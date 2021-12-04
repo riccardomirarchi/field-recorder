@@ -16,6 +16,7 @@ import Icon from 'react-native-vector-icons/AntDesign';
 import styles from '@styles/styles';
 import { pathToRecordingsFolder } from '@utils/recordings';
 import Spinner from 'react-native-loading-spinner-overlay';
+import EventItemCard from '@components/recordingDetails/EventItemCard';
 
 const RecordingDetails = ({ route }) => {
   const {
@@ -31,6 +32,7 @@ const RecordingDetails = ({ route }) => {
   const [playing, setPlaying] = useState(false);
   const [position, setPosition] = useState(0);
   const animation = useRef(new Animated.Value(0)).current;
+  const [highlighted, setHighlighted] = useState()
 
   useEffect(() => {
     if (!isFocused && soundObject) soundObject.unloadAsync();
@@ -76,16 +78,31 @@ const RecordingDetails = ({ route }) => {
     }).start();
   };
 
+  const highlightEvent = (position) => {
+    if (!position) return
+    recording.markedEvents.forEach(event => {
+      if (event.millisFromBeginning >= position - 80 && event.millisFromBeginning <= position + 80) {
+        if (highlighted == event) return
+        setHighlighted(event)
+        return
+      }
+    });
+  }
+
   const _onPlaybackStatusUpdate = async (playbackStatus, soundObject) => {
+
     setPlaying(playbackStatus.isPlaying && !playbackStatus.isBuffering);
 
     setPosition(playbackStatus.positionMillis);
 
     animateTimeline(playbackStatus.positionMillis);
 
+    highlightEvent(playbackStatus.positionMillis)
+
     if (playbackStatus.didJustFinish && !playbackStatus.isLooping) {
       await soundObject.setStatusAsync({ shouldPlay: false, positionMillis: 0 });
       animateTimeline(0);
+      setHighlighted()
     }
   };
 
@@ -118,21 +135,7 @@ const RecordingDetails = ({ route }) => {
 
   const _renderItem = ({ item }) => {
     return (
-      <TouchableWithoutFeedback
-        onPress={() => listenFromEvent(item.millisFromBeginning)}>
-        <View
-          style={[
-            styles.cardItemContainer,
-            {
-              height: 55,
-              justifyContent: 'space-between',
-            },
-          ]}>
-          <Text style={styles.cardItemTextStyle}>{item.title}</Text>
-
-          <Icon name={'playcircleo'} size={24} color={'gray'} />
-        </View>
-      </TouchableWithoutFeedback>
+      <EventItemCard item={item} onPress={() => listenFromEvent(item.millisFromBeginning)} highlighted={highlighted} />
     );
   };
 

@@ -1,6 +1,6 @@
 import React from 'react';
-import {BottomTabBar} from '@react-navigation/bottom-tabs';
-import {View} from 'react-native';
+import { BottomTabBar } from '@react-navigation/bottom-tabs';
+import { View } from 'react-native';
 import CustomAnimatedButton from './CustomAnimatedButton';
 import style from '@styles/styles';
 

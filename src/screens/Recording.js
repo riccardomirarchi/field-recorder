@@ -10,7 +10,6 @@ import {
   ToastAndroid,
   Alert,
   TouchableWithoutFeedback,
-  Modal,
 } from 'react-native';
 import RecordButton from '@components/recording/RecordButton';
 import ImageComponent from '@components/recording/ImageComponent';
@@ -25,7 +24,7 @@ import {
 } from '@utils/recordings';
 import flatlistContainerStyle from '@styles/styles';
 import CustomReloadIcon from '@navigation/CustomReloadIcon';
-import EventDetails from '@screens/EventDetails';
+import EventDetails from '@components/recording/EventDetails';
 
 const Recording = ({ navigation, route }) => {
   useEffect(() => {

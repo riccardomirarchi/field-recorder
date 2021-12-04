@@ -1,6 +1,6 @@
 import React from 'react';
-import {BlurView} from '@react-native-community/blur';
-import {BottomTabBar} from '@react-navigation/bottom-tabs';
+import { BlurView } from '@react-native-community/blur';
+import { BottomTabBar } from '@react-navigation/bottom-tabs';
 import CustomAnimatedButton from './CustomAnimatedButton';
 import style from '@styles/styles';
 

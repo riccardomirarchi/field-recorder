@@ -20,7 +20,7 @@ import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import Library from '@screens/Library';
 import Recording from '@screens/Recording';
 import RecordingDetails from '@screens/RecordingDetails';
-import EventDetails from '@screens/EventDetails';
+import Settings from '@screens/Settings'
 
 // custom tab bar
 import CustomTabBarAndroid from '@navigation/CustomTabBarAndroid';
@@ -81,29 +81,6 @@ const options = navigation => ({
   },
 });
 
-// to do: remove from this module
-function random({ navigation }) {
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>random page</Text>
-    </View>
-  );
-}
-
-// to do: remove from this module
-function Settings({ navigation }) {
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>settings page</Text>
-      <TouchableOpacity
-        onPress={() => navigation.push('Random')}
-        style={{ paddingVertical: 30 }}>
-        <Text>press me to navigate</Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
-
 function libraryStack() {
   return (
     <LibraryStack.Navigator
@@ -122,7 +99,6 @@ function recordingStack() {
     <RecordingStack.Navigator
       screenOptions={({ navigation }) => options(navigation)}>
       <RecordingStack.Screen name={'New Recording'} component={Recording} />
-      <RecordingStack.Screen name={'Event Details'} component={EventDetails} />
     </RecordingStack.Navigator>
   );
 }
@@ -132,7 +108,6 @@ function settingsStack() {
     <SettingsStack.Navigator
       screenOptions={({ navigation }) => options(navigation)}>
       <SettingsStack.Screen name={'Settings'} component={Settings} />
-      <SettingsStack.Screen name={'Random'} component={random} />
     </SettingsStack.Navigator>
   );
 }
