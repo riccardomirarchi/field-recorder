@@ -25,6 +25,7 @@ import {
 import flatlistContainerStyle from '@styles/styles';
 import CustomReloadIcon from '@navigation/CustomReloadIcon';
 import EventDetails from '@components/recording/EventDetails';
+import EventCardItem from '@components/recording/EventCardItem';
 
 const Recording = ({ navigation, route }) => {
   useEffect(() => {
@@ -259,29 +260,33 @@ const Recording = ({ navigation, route }) => {
     }
   };
 
-  const _renderItem = ({ item, index }) => {
-    return (
-      <TouchableWithoutFeedback
-        onPress={() => {
-          setEvent(item);
-          setIndex(index);
-          setModalVisible(true);
-        }}>
-        <View
-          style={[
-            flatlistContainerStyle.cardItemContainer,
-            {
-              height: 55,
-              justifyContent: 'space-between',
-            },
-          ]}>
-          <Text style={flatlistContainerStyle.cardItemTextStyle}>
-            {item.title}
-          </Text>
 
-          <Icon name={'rightcircle'} size={24} color={'gray'} />
-        </View>
-      </TouchableWithoutFeedback>
+  const _renderItem = ({ item }) => {
+    return (
+      <EventCardItem item={item} />
+      // <TouchableWithoutFeedback
+      //   onPress={() => {
+      //     expandEvent()
+      //     return
+      //     setEvent(item);
+      //     setIndex(index);
+      //     setModalVisible(true);
+      //   }}>
+      //   <Animated.View
+      //     style={[
+      //       flatlistContainerStyle.cardItemContainer,
+      //       {
+      //         height: openingAnimation,
+      //         justifyContent: 'space-between',
+      //       },
+      //     ]}>
+      //     <Text style={flatlistContainerStyle.cardItemTextStyle}>
+      //       {item.title}
+      //     </Text>
+
+      //     <Icon name={'downcircle'} size={24} color={'gray'} />
+      //   </Animated.View>
+      // </TouchableWithoutFeedback>
     );
   };
 
