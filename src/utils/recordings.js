@@ -1,11 +1,11 @@
-import {createContext} from 'react';
+import { createContext } from 'react';
 import * as FileSystem from 'expo-file-system';
-import {Audio} from 'expo-av';
+import { Audio } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const RecordingsContext = createContext();
 
-export const recordingsReducer = ({recordings}, {type, payload}) => {
+export const recordingsReducer = ({ recordings }, { type, payload }) => {
   switch (type) {
     case 'ADD_NEW_RECORDING':
       return {
@@ -79,7 +79,7 @@ export const recordingsMemo = (dispatch, recordings) => ({
       console.log(e, 'error while getting folders info in file system');
     }
   },
-  ADD_NEW_RECORDING: async newRecording => {
+  ADD_NEW_RECORDING: newRecording => {
     // this function moves the recording and the additional photo from the temporary cache dir
     // to the document directory of the app which contains a dedicated folder for both images and recordings
     // then it updates the json with all the new recordings' info and the state

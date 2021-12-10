@@ -149,6 +149,7 @@ const Recording = ({ navigation, route }) => {
     }).start();
   };
 
+  // to do: request at install
   const startRecording = async () => {
     let permissionStatus = 'not granted';
 
@@ -337,6 +338,7 @@ const Recording = ({ navigation, route }) => {
         renderItem={_renderItem}
         ListFooterComponent={
           <View style={flatlistContainerStyle.itemContainer}>
+            {/* to do: add muted mic */}
             <Button
               disabled={!audioUri}
               onPress={() => {
