@@ -29,7 +29,6 @@
 		4FBA1EED7F8D3A8249D3648F /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-fieldrecorder/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		56130E9F275B03600015BCFB /* anything.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = anything.swift; sourceTree = "<group>"; };
 		56130EA1275B03650015BCFB /* fieldrecorder-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "fieldrecorder-Bridging-Header.h"; sourceTree = "<group>"; };
-		57717152C19776FB595C6F51 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-fieldrecorder-fieldrecorderTests/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = fieldrecorder/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		99DF23136E2A580C8C15D1C9 /* Pods-fieldrecorder.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-fieldrecorder.debug.xcconfig"; path = "Target Support Files/Pods-fieldrecorder/Pods-fieldrecorder.debug.xcconfig"; sourceTree = "<group>"; };
 		AA540AECA50C9F15C75C5415 /* libPods-fieldrecorder.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-fieldrecorder.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -143,19 +142,10 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		B57240D8FBC7416D1EDE99C1 /* fieldrecorderTests */ = {
-			isa = PBXGroup;
-			children = (
-				57717152C19776FB595C6F51 /* ExpoModulesProvider.swift */,
-			);
-			name = fieldrecorderTests;
-			sourceTree = "<group>";
-		};
 		D86CB2E6F1C44DDC82C245D6 /* ExpoModulesProviders */ = {
 			isa = PBXGroup;
 			children = (
 				6BEFBEE610135AE35665C560 /* fieldrecorder */,
-				B57240D8FBC7416D1EDE99C1 /* fieldrecorderTests */,
 			);
 			name = ExpoModulesProviders;
 			sourceTree = "<group>";

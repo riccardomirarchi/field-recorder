@@ -16,10 +16,10 @@ target 'fieldrecorder' do
     :hermes_enabled => false
   )
 
-  target 'fieldrecorderTests' do
-    inherit! :complete
-    # Pods for testing
-  end
+  # target 'fieldrecorderTests' do
+  #   inherit! :complete
+  #   # Pods for testing
+  # end
 
   # Enables Flipper.
   #
