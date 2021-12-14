@@ -8,7 +8,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     textAlign: 'left',
     zIndex: 2,
-    height: 70,
+    height: 50,
     marginVertical: 15,
   },
 });

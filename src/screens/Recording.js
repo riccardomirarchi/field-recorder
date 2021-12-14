@@ -1,4 +1,4 @@
-import React, { useRef, useState, useContext, useEffect } from 'react';
+import React, {useRef, useState, useContext, useEffect} from 'react';
 import {
   Platform,
   View,
@@ -16,7 +16,7 @@ import ImageComponent from '@components/recording/ImageComponent';
 import Geolocation from 'react-native-geolocation-service';
 import CompassHeading from 'react-native-compass-heading';
 import Icon from 'react-native-vector-icons/AntDesign';
-import { Audio } from 'expo-av';
+import {Audio} from 'expo-av';
 import {
   RecordingsContext,
   recordingOptions,
@@ -27,14 +27,14 @@ import CustomReloadIcon from '@navigation/CustomReloadIcon';
 import EventDetails from '@components/recording/EventDetails';
 import EventCardItem from '@components/recording/EventCardItem';
 
-const Recording = ({ navigation, route }) => {
+const Recording = ({navigation, route}) => {
   useEffect(() => {
     navigation.setOptions({
       ...Platform.select({
         android: {
           headerRight: () => (
             <TouchableWithoutFeedback onPress={() => showAlertToReset()}>
-              <View style={{ marginRight: 20 }}>
+              <View style={{marginRight: 20}}>
                 <Icon name={'reload1'} size={24} color={'#fff'} />
               </View>
             </TouchableWithoutFeedback>
@@ -51,14 +51,14 @@ const Recording = ({ navigation, route }) => {
 
   const showAlertToReset = () => {
     Alert.alert('Attention', 'You really want to discard the recording?', [
-      { text: 'Proceed', onPress: () => resetState(), style: 'destructive' },
-      { text: 'Cancel' },
+      {text: 'Proceed', onPress: () => resetState(), style: 'destructive'},
+      {text: 'Cancel'},
     ]);
   };
 
   const {
-    utils: { ADD_NEW_RECORDING },
-    state: { recordings },
+    utils: {ADD_NEW_RECORDING},
+    state: {recordings},
   } = useContext(RecordingsContext);
 
   const resetState = () => {
@@ -87,7 +87,7 @@ const Recording = ({ navigation, route }) => {
               resetState();
               navigation.jumpTo('LibraryStack', {
                 screen: 'Library',
-                params: { recording: newRecording },
+                params: {recording: newRecording},
               });
             },
           },
@@ -141,7 +141,9 @@ const Recording = ({ navigation, route }) => {
   };
 
   const animateIcon = metering => {
-    if (metering === undefined || metering <= -160) return;
+    if (metering === undefined || metering <= -160) {
+      return;
+    }
     Animated.spring(animation, {
       toValue: metering,
       friction: 5,
@@ -155,22 +157,22 @@ const Recording = ({ navigation, route }) => {
     // geolocation infos
     try {
       console.log('Requesting geolocation permissions...');
-      if (Platform.OS === 'ios')
+      if (Platform.OS === 'ios') {
         permissionStatus = await Geolocation.requestAuthorization('whenInUse');
-      else {
+      } else {
         permissionStatus = await hasGeolocationPermissionAndroid();
       }
 
       if (permissionStatus === 'granted') {
         Geolocation.getCurrentPosition(
           position => {
-            const { accuracy, latitude, longitude } = position.coords;
-            setGeolocation({ accuracy, latitude, longitude });
+            const {accuracy, latitude, longitude} = position.coords;
+            setGeolocation({accuracy, latitude, longitude});
           },
           error => {
             console.log(error.code, error.message);
           },
-          { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 },
+          {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
         );
       } else {
         console.log('geolocation permissions not granted :(');
@@ -180,14 +182,13 @@ const Recording = ({ navigation, route }) => {
     }
 
     // compass heading infos
-    CompassHeading.start(0, ({ heading }) => {
+    CompassHeading.start(0, ({heading}) => {
       setOrientation(heading);
       CompassHeading.stop();
     });
 
-    // audio 
+    // audio
     try {
-
       console.log('Requesting audio permissions..');
       await Audio.requestPermissionsAsync();
 
@@ -203,7 +204,7 @@ const Recording = ({ navigation, route }) => {
 
       const progressUpdateIntervalMillis = 200;
 
-      const { recording } = await Audio.Recording.createAsync(
+      const {recording} = await Audio.Recording.createAsync(
         recordingOptions,
         onRecordingStatusUpdate,
         progressUpdateIntervalMillis,
@@ -218,7 +219,7 @@ const Recording = ({ navigation, route }) => {
     }
   };
 
-  const onRecordingStatusUpdate = ({ metering, durationMillis, isRecording }) => {
+  const onRecordingStatusUpdate = ({metering, durationMillis, isRecording}) => {
     animateIcon(metering);
     setIsRecording(isRecording);
     setPosition(durationMillis);
@@ -260,34 +261,8 @@ const Recording = ({ navigation, route }) => {
     }
   };
 
-
-  const _renderItem = ({ item }) => {
-    return (
-      <EventCardItem item={item} />
-      // <TouchableWithoutFeedback
-      //   onPress={() => {
-      //     expandEvent()
-      //     return
-      //     setEvent(item);
-      //     setIndex(index);
-      //     setModalVisible(true);
-      //   }}>
-      //   <Animated.View
-      //     style={[
-      //       flatlistContainerStyle.cardItemContainer,
-      //       {
-      //         height: openingAnimation,
-      //         justifyContent: 'space-between',
-      //       },
-      //     ]}>
-      //     <Text style={flatlistContainerStyle.cardItemTextStyle}>
-      //       {item.title}
-      //     </Text>
-
-      //     <Icon name={'downcircle'} size={24} color={'gray'} />
-      //   </Animated.View>
-      // </TouchableWithoutFeedback>
-    );
+  const _renderItem = ({item}) => {
+    return <EventCardItem item={item} />;
   };
 
   return (
@@ -308,7 +283,7 @@ const Recording = ({ navigation, route }) => {
         ListHeaderComponent={
           <View>
             <View
-              style={[flatlistContainerStyle.itemContainer, { paddingTop: 0 }]}>
+              style={[flatlistContainerStyle.itemContainer, {paddingTop: 0}]}>
               <ImageComponent setImageUri={setImageUri} />
             </View>
             <View style={flatlistContainerStyle.itemContainer}>
@@ -321,7 +296,7 @@ const Recording = ({ navigation, route }) => {
               />
             </View>
             <View style={flatlistContainerStyle.itemContainer}>
-              <Animated.Text style={{ fontSize: 18, color: 'gray' }}>
+              <Animated.Text style={{fontSize: 18, color: 'gray'}}>
                 {formatMillis(position)}
               </Animated.Text>
             </View>

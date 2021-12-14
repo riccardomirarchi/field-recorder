@@ -1,6 +1,6 @@
-import { StyleSheet, StatusBar, Dimensions } from 'react-native';
-import { getStatusBarHeight } from 'react-native-iphone-x-helper';
-import { getBottomSpace } from 'react-native-iphone-x-helper';
+import {StyleSheet, StatusBar, Dimensions} from 'react-native';
+import {getStatusBarHeight} from 'react-native-iphone-x-helper';
+import {getBottomSpace} from 'react-native-iphone-x-helper';
 
 export const WINDOW_SIZE = Dimensions.get('window');
 export const SCREEN_SIZE = Dimensions.get('screen');
@@ -135,9 +135,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     elevation: 10,
   },
+  innerViewStyle: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    flex: 1,
+    position: 'absolute',
+    left: 20,
+    right: 20,
+    top: 15,
+  },
   cardItemTextStyle: {
     color: '#464646',
-    paddingTop: 1
+    paddingTop: 1,
   },
 });
 
