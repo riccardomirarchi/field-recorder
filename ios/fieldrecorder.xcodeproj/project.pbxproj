@@ -344,11 +344,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-<<<<<<< HEAD
 				DEVELOPMENT_TEAM = 939JXB2FM5;
-=======
-				DEVELOPMENT_TEAM = 87Q4B393BY;
->>>>>>> a31edaa2eb780c18aade90fc6f4c25c4ac8a8851
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = fieldrecorder/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -380,11 +376,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-<<<<<<< HEAD
 				DEVELOPMENT_TEAM = 939JXB2FM5;
-=======
-				DEVELOPMENT_TEAM = 87Q4B393BY;
->>>>>>> a31edaa2eb780c18aade90fc6f4c25c4ac8a8851
 				INFOPLIST_FILE = fieldrecorder/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
