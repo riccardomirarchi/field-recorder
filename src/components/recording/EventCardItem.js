@@ -1,13 +1,13 @@
-import React, {useRef, useState} from 'react';
-import {Animated, TouchableWithoutFeedback, Text, View} from 'react-native';
+import React, { useRef, useState } from 'react';
+import { Animated, TouchableWithoutFeedback, Text, View } from 'react-native';
 import flatlistContainerStyle from '@styles/styles';
 import Icon from 'react-native-vector-icons/AntDesign';
 import EventPlayer from './EventPlayer';
-import {formatMillis} from '@utils/recordings';
+import { formatMillis } from '@utils/recordings';
 
 const AnimatedIcon = Animated.createAnimatedComponent(Icon);
 
-const EventCardItem = ({item}) => {
+const EventCardItem = ({ item, duration, isRecording }) => {
   const [opened, setOpened] = useState(false);
   const openingAnimation = useRef(new Animated.Value(0)).current;
 
@@ -55,7 +55,7 @@ const EventCardItem = ({item}) => {
         }}>
         <View style={flatlistContainerStyle.innerViewStyle}>
           <Text
-            style={[flatlistContainerStyle.cardItemTextStyle, {paddingTop: 4}]}>
+            style={[flatlistContainerStyle.cardItemTextStyle, { paddingTop: 4 }]}>
             {`${item.title}  -  ${formatMillis(item.millisFromBeginning)}`}
           </Text>
 
@@ -69,8 +69,18 @@ const EventCardItem = ({item}) => {
           />
         </View>
       </TouchableWithoutFeedback>
-      <Animated.View style={{opacity: openingAnimation}}>
-        <EventPlayer event={item} opened={opened} />
+      <Animated.View style={{
+        opacity: openingAnimation.interpolate({
+          inputRange: [0, 1],
+          outputRange: [-5, 1]
+        }),
+        position: 'absolute',
+        zIndex: openingAnimation.interpolate({
+          inputRange: [0, 1],
+          outputRange: [-1, 1]
+        })
+      }}>
+        <EventPlayer event={item} opened={opened} duration={duration} isRecording={isRecording} />
       </Animated.View>
     </Animated.View>
   );

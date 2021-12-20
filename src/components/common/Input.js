@@ -1,14 +1,14 @@
 import React from 'react';
-import {TextInput, StyleSheet} from 'react-native';
+import { TextInput, StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
   inputStyle: {
     backgroundColor: '#2c2c2c',
-    padding: 15,
+    padding: 10,
     borderRadius: 20,
     textAlign: 'left',
     zIndex: 2,
-    height: 50,
+    height: 35,
     marginVertical: 15,
   },
 });
@@ -25,6 +25,7 @@ const Input = React.forwardRef((props, ref) => {
     onSubmitEditing = () => null,
     value,
     multiline = false,
+    editable
   } = props;
   return (
     <TextInput
@@ -32,6 +33,8 @@ const Input = React.forwardRef((props, ref) => {
       placeholderTextColor={'#b3b1ab'}
       color={'white'}
       value={value}
+      selectTextOnFocus={editable}
+      editable={editable}
       ref={ref}
       secureTextEntry={secureTextEntry}
       autoComplete={autoComplete}

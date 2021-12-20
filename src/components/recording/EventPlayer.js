@@ -1,4 +1,4 @@
-import React, {useRef, useState, useEffect} from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   View,
   Animated,
@@ -9,14 +9,14 @@ import {
   Keyboard,
   Platform,
 } from 'react-native';
-import styles, {utilsStyles, SCREEN_SIZE} from '@styles/styles';
+import styles, { utilsStyles, SCREEN_SIZE } from '@styles/styles';
 import PlayerComponent from '@components/recordingDetails/playerComponent';
 import Spinner from 'react-native-loading-spinner-overlay';
 import Icon from 'react-native-vector-icons/AntDesign';
-import {Audio} from 'expo-av';
+import { Audio } from 'expo-av';
 import Input from '@components/common/Input';
 
-const EventPlayer = ({event, opened}) => {
+const EventPlayer = ({ event, opened, duration, isRecording }) => {
   useEffect(() => {
     if (opened) {
       bootstrapAudio();
@@ -43,8 +43,8 @@ const EventPlayer = ({event, opened}) => {
         allowsRecordingIOS: false,
       });
 
-      const {sound: soundObject} = await Audio.Sound.createAsync(
-        {uri: audioUri},
+      const { sound: soundObject } = await Audio.Sound.createAsync(
+        { uri: audioUri },
         {
           progressUpdateIntervalMillis: 80,
           positionMillis: event?.millisFromBeginning,
@@ -125,21 +125,37 @@ const EventPlayer = ({event, opened}) => {
     }).start();
   };
 
+  // if (!opened) return null
+
   return (
     <View>
-      <View style={[utilsStyles.mv25, utilsStyles.ph25]}>
+
+      {/* <PlayerComponent
+        playing={playing}
+        animation={animation}
+        onPress={() =>
+          playing ? stopAndSetToEvent() : listenRecording()
+        }
+        position={position}
+        duration={duration}
+        fromEvent={true}
+      /> */}
+
+      <View style={[utilsStyles.ph25, { width: 335, marginTop: 20 }]}>
         <Input
           placeholder={'Event title'}
           onChangeText={setTitle}
           value={eventTitle}
           onSubmitEditing={() => descriptionInput.current.focus()}
+          editable={opened}
         />
         <Input
           placeholder={'Description'}
           onChangeText={setDescription}
           value={description}
           ref={descriptionInput}
-          multiline={true}
+          editable={opened}
+        // multiline={true}
         />
       </View>
     </View>
