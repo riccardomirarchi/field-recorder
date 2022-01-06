@@ -2,11 +2,13 @@ import React, { useEffect, useRef } from 'react'
 import { TouchableWithoutFeedback, Animated } from 'react-native'
 import styles from '@styles/styles';
 import Icon from 'react-native-vector-icons/AntDesign';
+import { formatMillis } from '../../utils/recordings';
 
 const AnimatedIcon = Animated.createAnimatedComponent(Icon)
 
 const EventItemCard = ({ onPress, item, highlighted }) => {
   const colorAnim = useRef(new Animated.Value(0)).current;
+
 
   const animateEvent = (toValue) => {
     Animated.timing(colorAnim, {
@@ -53,7 +55,7 @@ const EventItemCard = ({ onPress, item, highlighted }) => {
             backgroundColor
           },
         ]}>
-        <Animated.Text style={[styles.cardItemTextStyle, { color: textColor }]}>{item.title}</Animated.Text>
+        <Animated.Text style={[styles.cardItemTextStyle, { color: textColor }]}>{`${item.title}  -  ${formatMillis(item.millisFromBeginning)}`}</Animated.Text>
 
         <AnimatedIcon name={'playcircleo'} size={24} style={{ color: iconColor }} />
       </Animated.View>

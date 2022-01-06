@@ -6,19 +6,21 @@ import {
   Button,
   Animated,
   TouchableWithoutFeedback,
+  Platform
 } from 'react-native';
 import { Audio } from 'expo-av';
 import PhotoModal from '@components/recordingDetails/photoModal';
 import PlayerComponent from '@components/recordingDetails/playerComponent';
 import DeleteButton from '@components/recordingDetails/deleteButton';
 import { useIsFocused } from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/AntDesign';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import styles from '@styles/styles';
-import { pathToRecordingsFolder } from '@utils/recordings';
+import { pathToRecordingsFolder, exportRecording } from '@utils/recordings';
 import Spinner from 'react-native-loading-spinner-overlay';
 import EventItemCard from '@components/recordingDetails/EventItemCard';
+import CustomShareIcon from '../navigation/CustomShareIcon';
 
-const RecordingDetails = ({ route }) => {
+const RecordingDetails = ({ route, navigation }) => {
   const {
     params: { recording },
   } = route;
@@ -39,7 +41,27 @@ const RecordingDetails = ({ route }) => {
   }, [isFocused]);
 
   useEffect(() => {
+    navigation.setOptions({
+      ...Platform.select({
+        android: {
+          headerRight: () => (
+            <TouchableWithoutFeedback onPress={() => exportRecording(recording)}>
+              <View style={{ marginRight: 20 }}>
+                <Icon name={'export'} size={27} color={'#fff'} />
+              </View>
+            </TouchableWithoutFeedback>
+          ),
+        },
+        ios: {
+          headerRight: () => (
+            <CustomShareIcon onPress={() => exportRecording(recording)} />
+          ),
+        },
+      }),
+    });
+
     bootstrapAudio();
+
   }, []);
 
   const bootstrapAudio = async () => {
@@ -164,7 +186,7 @@ const RecordingDetails = ({ route }) => {
       ListEmptyComponent={() => {
         return (
           <View style={{ alignItems: 'center', flex: 1, paddingTop: 30 }}>
-            <Text>You have marked no events in this timeline.</Text>
+            <Text style={{ color: '#4f4f4f' }}>You have marked no events in this timeline.</Text>
           </View>
         );
       }}
@@ -179,16 +201,19 @@ const RecordingDetails = ({ route }) => {
               duration={recording.duration}
             />
           </View>
-          <View style={styles.itemContainer}>
-            <Button
-              onPress={() => setModalVisible(true)}
-              title={'Open Photo'}
-            />
-            <PhotoModal
-              modalVisible={modalVisible}
-              setModalVisible={setModalVisible}
-              imageUri={recording.imageUri}
-            />
+          <View style={[styles.itemContainer, { paddingTop: 0 }]}>
+            {recording.imageUri &&
+              <>
+                <Button
+                  onPress={() => setModalVisible(true)}
+                  title={'Open Photo'}
+                />
+                <PhotoModal
+                  modalVisible={modalVisible}
+                  setModalVisible={setModalVisible}
+                  imageUri={recording.imageUri}
+                />
+              </>}
           </View>
         </View>
       }

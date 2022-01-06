@@ -2,6 +2,9 @@ import { createContext } from 'react';
 import * as FileSystem from 'expo-file-system';
 import { Audio } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Alert } from 'react-native';
+import JSZip from 'jszip';
+import Share from 'react-native-share';
 
 export const RecordingsContext = createContext();
 
@@ -71,6 +74,15 @@ export const recordingsMemo = (dispatch, recordings) => ({
           await FileSystem.readAsStringAsync(pathToJSON, options),
         );
       }
+
+      // set default (true) settings if none is found on the storage
+      const recordingQuality = JSON.parse(await AsyncStorage.getItem('recordingQuality'))
+
+      if (recordingQuality === null || recordingQuality === undefined) {
+        await AsyncStorage.setItem('recordingQuality', JSON.stringify(true))
+        await AsyncStorage.setItem('saveRecordings', JSON.stringify(true))
+      }
+
       dispatch({
         type: 'RETRIEVE_RECORDINGS',
         payload,
@@ -167,7 +179,7 @@ export const recordingsMemo = (dispatch, recordings) => ({
 });
 
 // low quality recording presets (default)
-export const iosRecordingPreset = {
+const iosRecordingPreset = {
   extension: '.caf',
   audioQuality: Audio.RECORDING_OPTION_IOS_AUDIO_QUALITY_MIN,
   sampleRate: 44100,
@@ -178,7 +190,7 @@ export const iosRecordingPreset = {
   linearPCMIsFloat: false,
 };
 
-export const androidRecordingPreset = {
+const androidRecordingPreset = {
   extension: '.3gp',
   outputFormat: Audio.RECORDING_OPTION_ANDROID_OUTPUT_FORMAT_THREE_GPP,
   audioEncoder: Audio.RECORDING_OPTION_ANDROID_AUDIO_ENCODER_AMR_NB,
@@ -187,11 +199,41 @@ export const androidRecordingPreset = {
   bitRate: 256000,
 };
 
-export const recordingOptions = {
-  isMeteringEnabled: true,
+// high quality rec presets
+const iosRecordingPresetHighQuality = {
+  extension: '.caf',
+  audioQuality: Audio.RECORDING_OPTION_IOS_AUDIO_QUALITY_MAX,
+  sampleRate: 44100,
+  numberOfChannels: 2,
+  bitRate: 320000,
+  linearPCMBitDepth: 16,
+  linearPCMIsBigEndian: false,
+  linearPCMIsFloat: false,
+}
+
+const androidRecordingPresetHighQuality = {
+  extension: '.m4a',
+  outputFormat: Audio.RECORDING_OPTION_ANDROID_OUTPUT_FORMAT_MPEG_4,
+  audioEncoder: Audio.RECORDING_OPTION_ANDROID_AUDIO_ENCODER_AAC,
+  sampleRate: 44100,
+  numberOfChannels: 2,
+  bitRate: 320000,
+}
+
+export const LOW_QUALITY_PRESETS = {
   android: androidRecordingPreset,
   ios: iosRecordingPreset,
-};
+}
+
+export const HIGH_QUALITY_PRESETS = {
+  android: androidRecordingPresetHighQuality,
+  ios: iosRecordingPresetHighQuality,
+}
+
+export const recordingOptions = async () => ({
+  isMeteringEnabled: true, // this is crucial for ui metering animation
+  ...JSON.parse(await AsyncStorage.getItem('recordingQuality')) == true ? HIGH_QUALITY_PRESETS : LOW_QUALITY_PRESETS
+});
 
 export const formatMillis = millis => {
   let h = Math.floor(millis / 1000 / 60 / 60);
@@ -199,3 +241,34 @@ export const formatMillis = millis => {
   let s = Math.floor(((millis / 1000 / 60 / 60 - h) * 60 - m) * 60);
   return `${m}:${s < 10 ? '0' : ''}${s}`;
 };
+
+const shareOptions = {
+  title: 'Share via',
+};
+
+export const exportRecording = async (recording) => {
+  // to do: create a folder with audio, image, and json with all infos, then zip it and share it
+
+  var zip = new JSZip();
+
+  zip.file('Info.js', JSON.stringify(recording))
+
+  const zippedFolder = await zip.generateAsync({ type: "string" })
+
+  await FileSystem.writeAsStringAsync(
+    FileSystem.documentDirectory + 'Zipped/',
+    JSON.stringify(zippedFolder),
+    options,
+  );
+
+
+  Share.open({
+    title: 'ciao',
+    url: pathToJSON
+  })
+    .then((res) => { console.log(res) })
+    .catch((err) => { err && console.log(err); });
+
+
+  // Alert.alert('not yet implemented')
+}

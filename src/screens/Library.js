@@ -1,11 +1,11 @@
-import React, {useContext, useEffect} from 'react';
-import {FlatList, View, Text} from 'react-native';
+import React, { useContext, useEffect } from 'react';
+import { FlatList, View, Text } from 'react-native';
 import styles from '@styles/styles';
 import CardItem from '@components/library/CardItem';
-import {RecordingsContext} from '@utils/recordings';
-import {useIsFocused} from '@react-navigation/native';
+import { RecordingsContext } from '@utils/recordings';
+import { useIsFocused } from '@react-navigation/native';
 
-const Library = ({navigation, route}) => {
+const Library = ({ navigation, route }) => {
   const focused = useIsFocused();
 
   useEffect(() => {
@@ -19,10 +19,10 @@ const Library = ({navigation, route}) => {
   }, [route.params?.recording]);
 
   const {
-    state: {recordings},
+    state: { recordings },
   } = useContext(RecordingsContext);
 
-  const _renderItem = ({item}) => {
+  const _renderItem = ({ item }) => {
     return <CardItem item={item} />;
   };
 
@@ -35,8 +35,8 @@ const Library = ({navigation, route}) => {
       contentContainerStyle={styles.container}
       ListEmptyComponent={() => {
         return (
-          <View style={{alignItems: 'center', flex: 1, paddingTop: 30}}>
-            <Text>You don't have any recording yet.</Text>
+          <View style={{ alignItems: 'center', flex: 1, paddingTop: 30 }}>
+            <Text style={{ color: '#4f4f4f' }} >You don't have any recording yet.</Text>
           </View>
         );
       }}

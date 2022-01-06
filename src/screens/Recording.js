@@ -5,7 +5,6 @@ import {
   Animated,
   PermissionsAndroid,
   FlatList,
-  Text,
   Button,
   ToastAndroid,
   Alert,
@@ -16,6 +15,7 @@ import ImageComponent from '@components/recording/ImageComponent';
 import Geolocation from 'react-native-geolocation-service';
 import CompassHeading from 'react-native-compass-heading';
 import Icon from 'react-native-vector-icons/AntDesign';
+import Ionicon from 'react-native-vector-icons/Ionicons';
 import { Audio } from 'expo-av';
 import {
   RecordingsContext,
@@ -24,30 +24,70 @@ import {
 } from '@utils/recordings';
 import flatlistContainerStyle from '@styles/styles';
 import CustomReloadIcon from '@navigation/CustomReloadIcon';
-import EventDetails from '@components/recording/EventDetails';
 import EventCardItem from '@components/recording/EventCardItem';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useIsFocused } from '@react-navigation/native';
+import CustomMicOffIcon from '@navigation/CustomMicOffIcon';
 
-const Recording = ({ navigation, route }) => {
+const Recording = ({ navigation }) => {
+
+  const focused = useIsFocused()
+
   useEffect(() => {
-    navigation.setOptions({
-      ...Platform.select({
-        android: {
-          headerRight: () => (
-            <TouchableWithoutFeedback onPress={() => showAlertToReset()}>
-              <View style={{ marginRight: 20 }}>
-                <Icon name={'reload1'} size={24} color={'#fff'} />
-              </View>
-            </TouchableWithoutFeedback>
-          ),
-        },
-        ios: {
-          headerRight: () => (
-            <CustomReloadIcon onPress={() => showAlertToReset()} />
-          ),
-        },
-      }),
-    });
-  }, []);
+
+    const canSaveRec = async () => {
+
+      const canSaveRecording = JSON.parse(await AsyncStorage.getItem('saveRecordings'))
+      setCanSaveRecording(canSaveRecording)
+
+      return canSaveRecording
+    }
+
+    canSaveRec().then(canSave => {
+      navigation.setOptions({
+        ...Platform.select({
+          android: {
+            headerRight: () => (
+              <TouchableWithoutFeedback onPress={() => showAlertToReset()}>
+                <View style={{ marginRight: 20 }}>
+                  <Icon name={'reload1'} size={24} color={'#fff'} />
+                </View>
+              </TouchableWithoutFeedback>
+            ),
+            headerBackImage: () => {
+              // to do: check if it's rendered properly
+              return (
+                !canSave && (
+                  <TouchableWithoutFeedback onPress={() => showMicOffAlert()}>
+                    <Ionicon name={'mic-off'} size={24} color={'#8b0000'} />
+                  </TouchableWithoutFeedback>
+                )
+              )
+            }
+          },
+          ios: {
+            headerRight: () => (
+              <CustomReloadIcon onPress={() => showAlertToReset()} />
+            ),
+            headerLeft: () => {
+              return (
+                !canSave && (
+                  <CustomMicOffIcon onPress={() => showMicOffAlert()} />
+                )
+              )
+            }
+          },
+        }),
+      });
+    })
+  }, [focused]);
+
+  const showMicOffAlert = () => {
+    Alert.alert('Information', 'This icon means that the audio file won\'t be saved in the device. If you want to save it you can change it in the Setting page.', [
+      { text: 'Cancel' },
+      { text: 'Go to Settings', onPress: () => navigation.jumpTo('SettingsStack'), style: 'cancel' },
+    ]);
+  }
 
   const showAlertToReset = () => {
     Alert.alert('Attention', 'You really want to discard the recording?', [
@@ -97,6 +137,7 @@ const Recording = ({ navigation, route }) => {
   };
 
   const [recording, setRecording] = useState();
+  const [canSaveRecording, setCanSaveRecording] = useState(true)
   const [initialRecordingTimestamp, setInitialRecordingTimestamp] = useState();
   const [audioUri, setAudioUri] = useState();
   const [imageUri, setImageUri] = useState(null);
@@ -153,6 +194,7 @@ const Recording = ({ navigation, route }) => {
 
   // to do: request at install
   const startRecording = async () => {
+
     let permissionStatus = 'not granted';
 
     // geolocation infos
@@ -206,7 +248,7 @@ const Recording = ({ navigation, route }) => {
       const progressUpdateIntervalMillis = 200;
 
       const { recording } = await Audio.Recording.createAsync(
-        recordingOptions,
+        await recordingOptions(),
         onRecordingStatusUpdate,
         progressUpdateIntervalMillis,
       );
@@ -266,9 +308,7 @@ const Recording = ({ navigation, route }) => {
     return <EventCardItem item={item} duration={duration} isRecording={isRecording} />;
   };
 
-  return (
-    <>
-      <EventDetails
+  {/* <EventDetails
         modalVisible={modalVisible}
         event={chosenEvent}
         audioUri={audioUri}
@@ -277,63 +317,64 @@ const Recording = ({ navigation, route }) => {
         setModalVisible={setModalVisible}
         index={eventIndex}
         markedEvents={markedEvents}
-      />
-      <FlatList
-        data={markedEvents}
-        contentContainerStyle={flatlistContainerStyle.container}
-        ListHeaderComponent={
-          <View>
-            <View
-              style={[flatlistContainerStyle.itemContainer, { paddingTop: 0 }]}>
-              <ImageComponent setImageUri={setImageUri} />
-            </View>
-            <View style={flatlistContainerStyle.itemContainer}>
-              <RecordButton
-                onPress={() =>
-                  !isRecording ? startRecording() : stopRecording()
-                }
-                animation={animation}
-                isRecording={isRecording}
-              />
-            </View>
-            <View style={flatlistContainerStyle.itemContainer}>
-              <Animated.Text style={{ fontSize: 18, color: 'gray' }}>
-                {formatMillis(position)}
-              </Animated.Text>
-            </View>
-            <View style={flatlistContainerStyle.itemContainer}>
-              <Button
-                onPress={() => markEvent()}
-                disabled={!isRecording}
-                title={'Mark Event'}
-              />
-            </View>
+      /> */}
+
+  return (
+    <FlatList
+      data={markedEvents}
+      contentContainerStyle={flatlistContainerStyle.container}
+      ListHeaderComponent={
+        <View>
+          <View
+            style={[flatlistContainerStyle.itemContainer, { paddingTop: 0 }]}>
+            <ImageComponent setImageUri={setImageUri} />
           </View>
-        }
-        renderItem={_renderItem}
-        ListFooterComponent={
           <View style={flatlistContainerStyle.itemContainer}>
-            {/* to do: add muted mic */}
-            <Button
-              disabled={!audioUri}
-              onPress={() => {
-                saveRecording({
-                  recordingName: `Recording ${recordings.length + 1}`,
-                  markedEvents,
-                  duration,
-                  initialRecordingTimestamp,
-                  geolocation,
-                  orientation,
-                  audioUri,
-                  imageUri,
-                });
-              }}
-              title={'Save Recording'}
+            <RecordButton
+              onPress={() =>
+                !isRecording ? startRecording() : stopRecording()
+              }
+              animation={animation}
+              isRecording={isRecording}
             />
           </View>
-        }
-      />
-    </>
+          <View style={flatlistContainerStyle.itemContainer}>
+            <Animated.Text style={{ fontSize: 18, color: 'gray' }}>
+              {formatMillis(position)}
+            </Animated.Text>
+          </View>
+          <View style={flatlistContainerStyle.itemContainer}>
+            <Button
+              onPress={() => markEvent()}
+              disabled={!isRecording}
+              title={'Mark Event'}
+            />
+          </View>
+        </View >
+      }
+      renderItem={_renderItem}
+      ListFooterComponent={
+        < View style={flatlistContainerStyle.itemContainer} >
+          {/* to do: add muted mic */}
+          < Button
+            disabled={!audioUri}
+            onPress={() => {
+              saveRecording({
+                recordingName: `Recording ${recordings.length + 1}`,
+                markedEvents,
+                duration,
+                initialRecordingTimestamp,
+                geolocation,
+                orientation,
+                audioUri,
+                imageUri,
+              });
+            }}
+            title={canSaveRecording ? 'Save Recording' : 'Save'}
+          />
+        </View >
+      }
+    />
   );
 };
 export default Recording;
