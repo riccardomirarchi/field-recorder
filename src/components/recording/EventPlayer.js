@@ -16,7 +16,7 @@ import Icon from 'react-native-vector-icons/AntDesign';
 import { Audio } from 'expo-av';
 import Input from '@components/common/Input';
 
-const EventPlayer = ({ event, opened, duration, isRecording }) => {
+const EventPlayer = ({ event, opened, duration, isRecording, audioUri }) => {
   useEffect(() => {
     if (opened) {
       bootstrapAudio();
@@ -115,7 +115,7 @@ const EventPlayer = ({ event, opened, duration, isRecording }) => {
   };
 
   const animateTimeline = position => {
-    if (position === undefined) {
+    if (position === undefined || position <= 0) {
       return;
     }
     Animated.timing(animation, {
@@ -125,12 +125,12 @@ const EventPlayer = ({ event, opened, duration, isRecording }) => {
     }).start();
   };
 
-  // if (!opened) return null
+  if (!opened) return null
 
   return (
     <View>
 
-      {/* <PlayerComponent
+      <PlayerComponent
         playing={playing}
         animation={animation}
         onPress={() =>
@@ -139,7 +139,7 @@ const EventPlayer = ({ event, opened, duration, isRecording }) => {
         position={position}
         duration={duration}
         fromEvent={true}
-      /> */}
+      />
 
       <View style={[utilsStyles.ph25, { width: 335, marginTop: 20 }]}>
         <Input

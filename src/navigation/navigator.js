@@ -72,7 +72,7 @@ const options = navigation => ({
   },
   headerTitleContainerStyle: {
     ...Platform.select({
-      ios: { marginTop: -40 },
+      ios: { marginTop: -42 },
     }),
   },
   headerTitleStyle: {

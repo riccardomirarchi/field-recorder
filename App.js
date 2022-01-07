@@ -2,6 +2,7 @@ import 'react-native-gesture-handler';
 import React, { useEffect, useMemo, useReducer } from 'react';
 import { useColorScheme } from 'react-native';
 import { connectActionSheet } from '@expo/react-native-action-sheet';
+import { requestPermissions } from '@utils/permissions';
 
 import {
   RecordingsContext,
@@ -21,6 +22,9 @@ const App = () => {
   useEffect(() => {
     const { RETRIEVE_RECORDINGS } = recordingsContext;
     RETRIEVE_RECORDINGS();
+
+    requestPermissions()
+
   }, []);
 
   const [recordingsState, dispatch] = useReducer(
