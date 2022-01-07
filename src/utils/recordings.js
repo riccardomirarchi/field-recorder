@@ -259,6 +259,8 @@ export const exportRecording = async (recording) => {
 
   const folderPath = pathToZippedFolder + `${tmpRecording.initialRecordingTimestamp}`
 
+  console.log(encodeURI(`${folderPath}.zip`), `${folderPath}.zip`)
+
   const showExportDialog = async () => {
     try {
       await Share.open({
@@ -272,7 +274,7 @@ export const exportRecording = async (recording) => {
 
   // we check if the zipped file already exists in the file system
   // if not we create a new one, otherwise we skip and share
-  const zip = await FileSystem.getInfoAsync(`${folderPath}.zip`)
+  const zip = await FileSystem.getInfoAsync(encodeURI(`${folderPath}.zip`))
 
   if (zip.exists) {
     console.log('zipped file alreay exists, sharing directly..')

@@ -81,12 +81,14 @@ const Recording = ({ navigation }) => {
                 </View>
               </TouchableWithoutFeedback>
             ),
-            headerBackImage: () => {
+            headerLeft: () => {
               // to do: check if it's rendered properly
               return (
                 !canSave && (
                   <TouchableWithoutFeedback onPress={() => showMicOffAlert()}>
-                    <Ionicon name={'mic-off'} size={24} color={'#8b0000'} />
+                    <View style={{ left: 10, padding: 2 }} >
+                      <Ionicon name={'mic-off'} size={26} color={'#8b0000'} />
+                    </View>
                   </TouchableWithoutFeedback>
                 )
               )
