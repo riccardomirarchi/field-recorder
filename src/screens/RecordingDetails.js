@@ -6,7 +6,8 @@ import {
   Button,
   Animated,
   TouchableWithoutFeedback,
-  Platform
+  Platform,
+  TextInput
 } from 'react-native';
 import { Audio } from 'expo-av';
 import PhotoModal from '@components/recordingDetails/photoModal';
@@ -58,6 +59,17 @@ const RecordingDetails = ({ route, navigation }) => {
           ),
         },
       }),
+      headerTitle: () => (
+        // to do: make it effectively change the name of the recording 
+        <TextInput
+          value={recording.recordingName}
+          style={{
+            fontSize: 22,
+            color: '#FFF',
+            fontWeight: '600'
+          }}
+        />
+      )
     });
 
     bootstrapAudio();

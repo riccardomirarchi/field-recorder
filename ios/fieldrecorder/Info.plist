@@ -45,6 +45,12 @@
 	<string>Allow $(PRODUCT_NAME) to access to access your photo library</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Allow $(PRODUCT_NAME) to access to your photo gallery</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>airdrop</string>
+		<string>whatsapp</string>
+		<string>mailto</string>
+	</array>
 	<key>UIAppFonts</key>
 	<array>
 		<string>AntDesign.ttf</string>
