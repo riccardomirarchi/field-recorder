@@ -7,7 +7,7 @@ import { formatMillis } from '@utils/recordings';
 
 const AnimatedIcon = Animated.createAnimatedComponent(Icon);
 
-const EventCardItem = ({ item, duration, isRecording, audioUri }) => {
+const EventCardItem = ({ item, duration, isRecording, audioUri, index, setMarkedEvents }) => {
   const [opened, setOpened] = useState(false);
   const openingAnimation = useRef(new Animated.Value(0)).current;
 
@@ -29,7 +29,7 @@ const EventCardItem = ({ item, duration, isRecording, audioUri }) => {
 
   const height = openingAnimation.interpolate({
     inputRange: [0, 1],
-    outputRange: [55, 200],
+    outputRange: [55, 280],
   });
 
   const transform = [
@@ -81,13 +81,13 @@ const EventCardItem = ({ item, duration, isRecording, audioUri }) => {
         }),
         height: openingAnimation.interpolate({
           inputRange: [0, 1],
-          outputRange: [0, 100]
+          outputRange: [0, 180]
         }),
-        backgroundColor: 'blue',
+        // backgroundColor: 'blue',
         paddingVertical: 0
 
       }}>
-        <EventPlayer event={item} opened={opened} duration={duration} isRecording={isRecording} audioUri={audioUri} />
+        <EventPlayer event={item} opened={opened} duration={duration} isRecording={isRecording} audioUri={audioUri} index={index} setMarkedEvents={setMarkedEvents} />
       </Animated.View>
     </Animated.View>
   );

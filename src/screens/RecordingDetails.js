@@ -82,7 +82,7 @@ const RecordingDetails = ({ route, navigation }) => {
             fontSize: 22,
             color: '#FFF',
             fontWeight: '600',
-            width: 250
+            width: Platform.OS == 'android' ? 250 : null
           }}
           placeholder="Recording..."
           placeholderTextColor={'rgba(255, 255, 255, 0.5)'}

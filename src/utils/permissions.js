@@ -34,7 +34,6 @@ export const requestPermissions = async () => {
 
   if (Platform.OS === 'ios') {
     permissionStatus = await Geolocation.requestAuthorization('whenInUse');
-    console.log('ciao')
   } else {
     permissionStatus = await hasGeolocationPermissionAndroid();
   }

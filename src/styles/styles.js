@@ -1,6 +1,6 @@
-import {StyleSheet, StatusBar, Dimensions} from 'react-native';
-import {getStatusBarHeight} from 'react-native-iphone-x-helper';
-import {getBottomSpace} from 'react-native-iphone-x-helper';
+import { StyleSheet, StatusBar, Dimensions } from 'react-native';
+import { getStatusBarHeight } from 'react-native-iphone-x-helper';
+import { getBottomSpace } from 'react-native-iphone-x-helper';
 
 export const WINDOW_SIZE = Dimensions.get('window');
 export const SCREEN_SIZE = Dimensions.get('screen');
@@ -99,7 +99,6 @@ const styles = StyleSheet.create({
   },
   player: {
     paddingHorizontal: 1,
-
     justifyContent: 'center',
     alignSelf: 'center',
     width: PLAYER_WIDTH,
@@ -134,6 +133,7 @@ const styles = StyleSheet.create({
     height: 70,
     backgroundColor: '#fff',
     elevation: 10,
+    width: WINDOW_SIZE.width - 50
   },
   innerViewStyle: {
     flexDirection: 'row',

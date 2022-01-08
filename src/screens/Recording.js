@@ -3,10 +3,8 @@ import {
   Platform,
   View,
   Animated,
-  PermissionsAndroid,
   FlatList,
   Button,
-  ToastAndroid,
   Alert,
   TouchableWithoutFeedback,
 } from 'react-native';
@@ -29,32 +27,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useIsFocused } from '@react-navigation/native';
 import CustomMicOffIcon from '@navigation/CustomMicOffIcon';
 import { requestPermissions } from '@utils/permissions';
-
-export const hasGeolocationPermissionAndroid = async () => {
-  const hasPermission = await PermissionsAndroid.check(
-    PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-  );
-
-  if (hasPermission) {
-    return 'granted';
-  }
-
-  const status = await PermissionsAndroid.request(
-    PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-  );
-
-  if (status === PermissionsAndroid.RESULTS.GRANTED) {
-    return 'granted';
-  }
-
-  if (status === PermissionsAndroid.RESULTS.DENIED) {
-    ToastAndroid.show('Location permission denied...', ToastAndroid.LONG);
-  } else if (status === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
-    ToastAndroid.show('Location permission revoked...', ToastAndroid.LONG);
-  }
-
-  return 'not granted';
-};
 
 const Recording = ({ navigation }) => {
 
@@ -296,8 +268,8 @@ const Recording = ({ navigation }) => {
     }
   };
 
-  const _renderItem = ({ item }) => {
-    return <EventCardItem item={item} duration={duration} isRecording={isRecording} audioUri={audioUri} />;
+  const _renderItem = ({ item, index }) => {
+    return <EventCardItem item={item} duration={duration} isRecording={isRecording} audioUri={audioUri} index={index} setMarkedEvents={setMarkedEvents} />;
   };
 
   {/* <EventDetails

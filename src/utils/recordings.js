@@ -1,4 +1,5 @@
 import { createContext } from 'react';
+import { Platform } from 'react-native'
 import * as FileSystem from 'expo-file-system';
 import { Audio } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -95,6 +96,30 @@ export const recordingsMemo = (dispatch, recordings) => ({
         await AsyncStorage.setItem('recordingQuality', JSON.stringify(true))
         await AsyncStorage.setItem('saveRecordings', JSON.stringify(true))
       }
+
+      // here we take a look at the zipped file we have in the file system, if they have been created
+      // since more than a month we delete them for getting more free space on the device.
+      // this is not crucial, but helps save space, another approach would be not to save the zipped
+      // file in the document directory but in the cache directory, so they will be automatically deleted
+      // but we won't have control over it. For now we delete them on our own.
+      const zips = await FileSystem.readDirectoryAsync(pathToZippedFolder)
+
+      const diffInMonths = (end, start) => {
+        var timeDiff = Math.abs(end.getTime() - start.getTime());
+        return Math.round(timeDiff / (2e3 * 3600 * 365.25));
+      }
+
+      zips.forEach(async element => {
+        const infos = await FileSystem.getInfoAsync(`${pathToZippedFolder}${element}`)
+
+        var d = new Date(0);
+        d.setUTCSeconds(infos.modificationTime);
+
+        if (diffInMonths(new Date(), d) > 1) {
+          await FileSystem.deleteAsync(`${pathToZippedFolder}${element}`, { idempotent: true })
+        }
+
+      })
 
       dispatch({
         type: 'RETRIEVE_RECORDINGS',
@@ -195,15 +220,16 @@ export const recordingsMemo = (dispatch, recordings) => ({
     // and prompt the user to share it. finally it deletes the temporary unzipped 
     // folder and keeps the zipped one for later use
 
-    setIsLoading(true)
+    if (Platform.OS === 'android') setIsLoading(true)
 
     let tmpRecording = { ...recording }
 
-    // we must remove the : from the path, since stupid android file system crash...
+    // we must remove the : from the path, since stupid android file system crashes...
     const folderPath = pathToZippedFolder + `${tmpRecording.initialRecordingTimestamp.split(':').join('_')}`
 
     const showExportDialog = async () => {
-      setIsLoading(false)
+
+      if (Platform.OS === 'android') setIsLoading(false)
 
       try {
         await Share.open({
@@ -266,7 +292,7 @@ export const recordingsMemo = (dispatch, recordings) => ({
 
     } catch (e) {
       console.log(e, 'error while creating zip file')
-      setIsLoading(false)
+      if (Platform.OS === 'android') setIsLoading(false)
     } finally {
 
       // in the end we delete the newly created folder

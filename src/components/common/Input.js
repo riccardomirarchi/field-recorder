@@ -8,7 +8,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     textAlign: 'left',
     zIndex: 2,
-    height: 35,
+    height: 45,
     marginVertical: 15,
   },
 });
@@ -25,7 +25,8 @@ const Input = React.forwardRef((props, ref) => {
     onSubmitEditing = () => null,
     value,
     multiline = false,
-    editable
+    editable,
+    onEndEditing = () => null
   } = props;
   return (
     <TextInput
@@ -46,6 +47,7 @@ const Input = React.forwardRef((props, ref) => {
       style={[styles.inputStyle, style]}
       numberOfLines={multiline ? 5 : null}
       multiline={multiline}
+      onEndEditing={onEndEditing}
     />
   );
 });

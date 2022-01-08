@@ -4,15 +4,16 @@ import Icon from 'react-native-vector-icons/AntDesign';
 import styles, { PLAYER_WIDTH } from '@styles/styles';
 import { formatMillis } from '@utils/recordings';
 
-const PlayerComponent = ({ playing, animation, onPress, position, duration, fromEvent = false }) => {
+
+const PlayerComponent = ({ playing, animation, onPress, position, duration, fromEvent = false, style = {} }) => {
   const translateX = animation.interpolate({
     inputRange: [0, duration],
-    outputRange: [0, PLAYER_WIDTH - 18],
+    outputRange: [0, !fromEvent ? PLAYER_WIDTH - 18 : PLAYER_WIDTH / 1.62],
     extrapolate: 'clamp',
   });
 
   return (
-    <View style={styles.playerContainer}>
+    <View style={[styles.playerContainer, style.width ? { width: style.width } : {}]}>
       <View
         style={[
           styles.iconContainer,
@@ -33,7 +34,7 @@ const PlayerComponent = ({ playing, animation, onPress, position, duration, from
           </View>
         </TouchableWithoutFeedback>
       </View>
-      <View style={styles.player}>
+      <View style={[styles.player, style.playerWidth ? { width: style.playerWidth } : {}]}>
         <Animated.View
           style={[
             styles.innerPlayer,

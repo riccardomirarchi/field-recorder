@@ -1,24 +1,17 @@
 import React, { useRef, useState, useEffect } from 'react';
 import {
   View,
-  Animated,
-  Text,
-  TouchableWithoutFeedback,
-  Modal,
-  KeyboardAvoidingView,
-  Keyboard,
-  Platform,
+  Animated
 } from 'react-native';
-import styles, { utilsStyles, SCREEN_SIZE } from '@styles/styles';
+import { utilsStyles } from '@styles/styles';
 import PlayerComponent from '@components/recordingDetails/playerComponent';
-import Spinner from 'react-native-loading-spinner-overlay';
-import Icon from 'react-native-vector-icons/AntDesign';
+
 import { Audio } from 'expo-av';
 import Input from '@components/common/Input';
 
-const EventPlayer = ({ event, opened, duration, isRecording, audioUri }) => {
+const EventPlayer = ({ event, opened, duration, isRecording, audioUri, index, setMarkedEvents }) => {
   useEffect(() => {
-    if (opened) {
+    if (opened && !isRecording) {
       bootstrapAudio();
     } else {
       if (soundObject) {
@@ -36,6 +29,16 @@ const EventPlayer = ({ event, opened, duration, isRecording, audioUri }) => {
   const [soundObject, setSoundObject] = useState();
   const [error, setError] = useState();
   const descriptionInput = useRef();
+
+  const updateEvents = () => {
+
+    setMarkedEvents(events => {
+      events[index].title = eventTitle
+      events[index].description = description
+
+      return events
+    })
+  }
 
   const bootstrapAudio = async () => {
     try {
@@ -90,17 +93,17 @@ const EventPlayer = ({ event, opened, duration, isRecording, audioUri }) => {
     }
   };
 
-  const closeAndSave = () => {
-    const newEvents = markedEvents;
-    newEvents[index] = {
-      title: eventTitle,
-      millisFromBeginning: event?.millisFromBeginning,
-      description,
-    };
-    setMarkedEvents(newEvents);
-    setModalVisible(false);
-    soundObject.unloadAsync();
-  };
+  // const closeAndSave = () => {
+  //   const newEvents = markedEvents;
+  //   newEvents[index] = {
+  //     title: eventTitle,
+  //     millisFromBeginning: event?.millisFromBeginning,
+  //     description,
+  //   };
+  //   setMarkedEvents(newEvents);
+  //   setModalVisible(false);
+  //   soundObject.unloadAsync();
+  // };
 
   const stopAndSetToEvent = async () => {
     try {
@@ -125,29 +128,35 @@ const EventPlayer = ({ event, opened, duration, isRecording, audioUri }) => {
     }).start();
   };
 
-  if (!opened) return null
+  // if (isRecording) return null
 
   return (
     <View>
+      <View style={[utilsStyles.ph25, { width: 335 }]}>
+        <View style={{ marginVertical: 20 }} >
+          <PlayerComponent
+            playing={playing}
+            animation={animation}
+            onPress={() =>
+              playing ? stopAndSetToEvent() : listenRecording()
+            }
+            position={position}
+            duration={duration}
+            fromEvent={true}
+            style={{
+              width: 200,
+              playerWidth: 160
+            }}
+          />
+        </View>
 
-      <PlayerComponent
-        playing={playing}
-        animation={animation}
-        onPress={() =>
-          playing ? stopAndSetToEvent() : listenRecording()
-        }
-        position={position}
-        duration={duration}
-        fromEvent={true}
-      />
-
-      <View style={[utilsStyles.ph25, { width: 335, marginTop: 20 }]}>
         <Input
           placeholder={'Event title'}
           onChangeText={setTitle}
           value={eventTitle}
           onSubmitEditing={() => descriptionInput.current.focus()}
           editable={opened}
+          onEndEditing={() => updateEvents()}
         />
         <Input
           placeholder={'Description'}
@@ -155,7 +164,7 @@ const EventPlayer = ({ event, opened, duration, isRecording, audioUri }) => {
           value={description}
           ref={descriptionInput}
           editable={opened}
-        // multiline={true}
+          onEndEditing={() => updateEvents()}
         />
       </View>
     </View>
