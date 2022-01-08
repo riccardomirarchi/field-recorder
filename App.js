@@ -37,14 +37,12 @@ const App = () => {
     [recordingsState.recordings],
   );
 
-  const isDarkMode = useColorScheme() === 'dark';
-
   if (recordingsState.loading) return null;
 
   return (
     <RecordingsContext.Provider
       value={{ utils: recordingsContext, state: recordingsState }}>
-      <MainNavigator isDarkMode={isDarkMode} />
+      <MainNavigator />
     </RecordingsContext.Provider>
   );
 };

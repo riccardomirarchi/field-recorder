@@ -17,25 +17,20 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		00E356F21AD99517003FC87E /* fieldrecorderTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = fieldrecorderTests.m; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* fieldrecorder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = fieldrecorder.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = fieldrecorder/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = fieldrecorder/AppDelegate.m; sourceTree = "<group>"; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = fieldrecorder/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = fieldrecorder/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = fieldrecorder/main.m; sourceTree = "<group>"; };
-		4F760ADBAEC4EAB5C6AEDE0E /* Pods-fieldrecorder-fieldrecorderTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-fieldrecorder-fieldrecorderTests.release.xcconfig"; path = "Target Support Files/Pods-fieldrecorder-fieldrecorderTests/Pods-fieldrecorder-fieldrecorderTests.release.xcconfig"; sourceTree = "<group>"; };
 		4FBA1EED7F8D3A8249D3648F /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-fieldrecorder/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		56130E9F275B03600015BCFB /* anything.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = anything.swift; sourceTree = "<group>"; };
 		56130EA1275B03650015BCFB /* fieldrecorder-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "fieldrecorder-Bridging-Header.h"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = fieldrecorder/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		99DF23136E2A580C8C15D1C9 /* Pods-fieldrecorder.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-fieldrecorder.debug.xcconfig"; path = "Target Support Files/Pods-fieldrecorder/Pods-fieldrecorder.debug.xcconfig"; sourceTree = "<group>"; };
 		AA540AECA50C9F15C75C5415 /* libPods-fieldrecorder.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-fieldrecorder.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		C5EEEF1E38BB20727C6E2A13 /* Pods-fieldrecorder-fieldrecorderTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-fieldrecorder-fieldrecorderTests.debug.xcconfig"; path = "Target Support Files/Pods-fieldrecorder-fieldrecorderTests/Pods-fieldrecorder-fieldrecorderTests.debug.xcconfig"; sourceTree = "<group>"; };
 		DB7D30544F6DB695579D5641 /* Pods-fieldrecorder.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-fieldrecorder.release.xcconfig"; path = "Target Support Files/Pods-fieldrecorder/Pods-fieldrecorder.release.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
-		FF2BECD2711420C13EB6C1E8 /* libPods-fieldrecorder-fieldrecorderTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-fieldrecorder-fieldrecorderTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -50,30 +45,11 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		00E356EF1AD99517003FC87E /* fieldrecorderTests */ = {
-			isa = PBXGroup;
-			children = (
-				00E356F21AD99517003FC87E /* fieldrecorderTests.m */,
-				00E356F01AD99517003FC87E /* Supporting Files */,
-			);
-			path = fieldrecorderTests;
-			sourceTree = "<group>";
-		};
-		00E356F01AD99517003FC87E /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				00E356F11AD99517003FC87E /* Info.plist */,
-			);
-			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
 		0A862D9BDB41A3FBB7CDDE11 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
 				99DF23136E2A580C8C15D1C9 /* Pods-fieldrecorder.debug.xcconfig */,
 				DB7D30544F6DB695579D5641 /* Pods-fieldrecorder.release.xcconfig */,
-				C5EEEF1E38BB20727C6E2A13 /* Pods-fieldrecorder-fieldrecorderTests.debug.xcconfig */,
-				4F760ADBAEC4EAB5C6AEDE0E /* Pods-fieldrecorder-fieldrecorderTests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -98,7 +74,6 @@
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				AA540AECA50C9F15C75C5415 /* libPods-fieldrecorder.a */,
-				FF2BECD2711420C13EB6C1E8 /* libPods-fieldrecorder-fieldrecorderTests.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -123,7 +98,6 @@
 			children = (
 				13B07FAE1A68108700A75B9A /* fieldrecorder */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
-				00E356EF1AD99517003FC87E /* fieldrecorderTests */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				0A862D9BDB41A3FBB7CDDE11 /* Pods */,
