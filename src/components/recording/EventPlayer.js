@@ -1,7 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react';
 import {
   View,
-  Animated
+  Animated,
+  Alert
 } from 'react-native';
 import { utilsStyles } from '@styles/styles';
 import PlayerComponent from '@components/recordingDetails/playerComponent';
@@ -18,7 +19,7 @@ const EventPlayer = ({ event, opened, duration, isRecording, audioUri, index, se
         soundObject.unloadAsync();
       }
     }
-  }, [opened]);
+  }, [opened, isRecording]);
 
   const [eventTitle, setTitle] = useState(event?.title);
   const [description, setDescription] = useState(event?.description);
@@ -118,6 +119,7 @@ const EventPlayer = ({ event, opened, duration, isRecording, audioUri, index, se
   };
 
   const animateTimeline = position => {
+
     if (position === undefined || position <= 0) {
       return;
     }
@@ -140,6 +142,8 @@ const EventPlayer = ({ event, opened, duration, isRecording, audioUri, index, se
             onPress={() =>
               playing ? stopAndSetToEvent() : listenRecording()
             }
+            onPressDisabled={() => Alert.alert('Attention', 'You cannot play this event because the recording is still going. Stop the recording and come back!')}
+            disabled={isRecording}
             position={position}
             duration={duration}
             fromEvent={true}

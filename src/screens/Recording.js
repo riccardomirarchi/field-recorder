@@ -112,6 +112,7 @@ const Recording = ({ navigation }) => {
     setMarkedEvents([]);
     setIsRecording(false);
     setPosition(0);
+    setDuration(0)
   };
 
   const saveRecording = newRecording => {
@@ -145,7 +146,7 @@ const Recording = ({ navigation }) => {
   const [geolocation, setGeolocation] = useState(null);
   const [orientation, setOrientation] = useState(null);
   const [markedEvents, setMarkedEvents] = useState([]);
-  const [duration, setDuration] = useState();
+  const [duration, setDuration] = useState(0);
 
   const [isRecording, setIsRecording] = useState(false);
   const [position, setPosition] = useState(0); // will be used for showing elapsed time

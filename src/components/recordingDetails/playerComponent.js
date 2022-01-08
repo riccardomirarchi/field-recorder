@@ -5,7 +5,7 @@ import styles, { PLAYER_WIDTH } from '@styles/styles';
 import { formatMillis } from '@utils/recordings';
 
 
-const PlayerComponent = ({ playing, animation, onPress, position, duration, fromEvent = false, style = {} }) => {
+const PlayerComponent = ({ playing, animation, onPress, position, duration, fromEvent = false, style = {}, onPressDisabled, disabled }) => {
   const translateX = animation.interpolate({
     inputRange: [0, duration],
     outputRange: [0, !fromEvent ? PLAYER_WIDTH - 18 : PLAYER_WIDTH / 1.62],
@@ -24,7 +24,7 @@ const PlayerComponent = ({ playing, animation, onPress, position, duration, from
             marginBottom: 1,
           },
         ]}>
-        <TouchableWithoutFeedback onPress={onPress}>
+        <TouchableWithoutFeedback onPress={!fromEvent ? onPress : disabled ? onPressDisabled : onPress}>
           <View>
             <Icon
               name={playing ? fromEvent ? 'leftcircleo' : 'pausecircleo' : 'playcircleo'}
