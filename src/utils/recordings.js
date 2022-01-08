@@ -3,17 +3,19 @@ import * as FileSystem from 'expo-file-system';
 import { Audio } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Share from 'react-native-share';
-import { zip as zipFolder } from 'react-native-zip-archive'
+import { zip as zipFolder } from 'react-native-zip-archive';
 
 export const RecordingsContext = createContext();
 
 export const recordingsReducer = ({ recordings }, { type, payload }) => {
   switch (type) {
+
     case 'ADD_NEW_RECORDING':
       return {
         loading: false,
         recordings: [...recordings, payload],
       };
+
     case 'DELETE_RECORDING':
       return {
         loading: false,
@@ -30,6 +32,10 @@ export const recordingsReducer = ({ recordings }, { type, payload }) => {
 
 const options = {
   encoding: 'utf8',
+};
+
+const shareOptions = {
+  title: 'Share via',
 };
 
 export const pathToJSON = FileSystem.documentDirectory + 'recordings.json';
@@ -183,6 +189,106 @@ export const recordingsMemo = (dispatch, recordings) => ({
       }
     });
   },
+  EXPORT_RECORDING: async (recording, setIsLoading) => {
+    // this function takes a json with the recording info as a param, copy the audio 
+    // and image file (if present) to a newly created folder,then it zip this folder 
+    // and prompt the user to share it. finally it deletes the temporary unzipped 
+    // folder and keeps the zipped one for later use
+
+    setIsLoading(true)
+
+    let tmpRecording = { ...recording }
+
+    // we must remove the : from the path, since stupid android file system crash...
+    const folderPath = pathToZippedFolder + `${tmpRecording.initialRecordingTimestamp.split(':').join('_')}`
+
+    const showExportDialog = async () => {
+      setIsLoading(false)
+
+      try {
+        await Share.open({
+          ...shareOptions,
+          url: `${folderPath}.zip`
+        })
+      } catch (e) {
+        console.log(e, 'error while sharing file')
+      }
+    }
+
+    // we check if the zipped file already exists in the file system
+    // if not we create a new one, otherwise we skip and share
+    const zip = await FileSystem.getInfoAsync(`${folderPath}.zip`)
+
+    if (zip.exists) {
+      console.log('zipped file alreay exists, sharing directly..')
+
+      await showExportDialog()
+
+      return
+    }
+
+    try {
+      // we create a folder named with the timestamp, so it'll be unique (luckily)
+      await FileSystem.makeDirectoryAsync(folderPath, {
+        intermediates: true
+      })
+
+      // we copy the audio file (if present) to the folder just created
+      await FileSystem.copyAsync({
+        from: pathToRecordingsFolder + tmpRecording.audioUri,
+        to: `${folderPath}/${tmpRecording.audioUri}`,
+      });
+
+      // we copy the image file (if present) to the folder just created
+      if (tmpRecording.imageUri) {
+        await FileSystem.copyAsync({
+          from: pathToImagesFolder + tmpRecording.imageUri,
+          to: `${folderPath}/${tmpRecording.imageUri}`,
+        });
+      }
+
+      // remove useless info from exported json
+      delete tmpRecording.audioUri
+      delete tmpRecording.imageUri
+
+      // we create the json file with all the infos.
+      await FileSystem.writeAsStringAsync(
+        `${folderPath}/Info.json`,
+        JSON.stringify(tmpRecording),
+        options,
+      );
+
+      // we zip the folder with all the infos
+      await zipFolder(folderPath, `${folderPath}.zip`)
+
+      // we open the share dialog
+      await showExportDialog()
+
+    } catch (e) {
+      console.log(e, 'error while creating zip file')
+      setIsLoading(false)
+    } finally {
+
+      // in the end we delete the newly created folder
+      // just the folder, not the zipped file
+      await FileSystem.deleteAsync(folderPath, {
+        idempotent: true
+      })
+    }
+  },
+  RENAME_RECORDING: async (newRecordingName, recordingToBeRenamed) => {
+
+    // this is an 'in place' change, so the state will be updated automatically, no need to dispatch 
+    // an action and update the state manually, we only need to update the recordings in the fs
+    recordingToBeRenamed.recordingName = newRecordingName
+
+    await FileSystem.writeAsStringAsync(
+      pathToJSON,
+      JSON.stringify(recordings),
+      options,
+    );
+
+  }
 });
 
 // low quality recording presets (default)
@@ -249,87 +355,4 @@ export const formatMillis = millis => {
   return `${m}:${s < 10 ? '0' : ''}${s}`;
 };
 
-const shareOptions = {
-  title: 'Share via',
-};
 
-export const exportRecording = async (recording) => {
-
-  let tmpRecording = { ...recording }
-
-  const folderPath = pathToZippedFolder + `${tmpRecording.initialRecordingTimestamp}`
-
-  console.log(encodeURI(`${folderPath}.zip`), `${folderPath}.zip`)
-
-  const showExportDialog = async () => {
-    try {
-      await Share.open({
-        ...shareOptions,
-        url: `${folderPath}.zip`
-      })
-    } catch (e) {
-      console.log(e, 'error while sharing file')
-    }
-  }
-
-  // we check if the zipped file already exists in the file system
-  // if not we create a new one, otherwise we skip and share
-  const zip = await FileSystem.getInfoAsync(encodeURI(`${folderPath}.zip`))
-
-  if (zip.exists) {
-    console.log('zipped file alreay exists, sharing directly..')
-
-    await showExportDialog()
-
-    return
-  }
-
-
-  try {
-    // we create a folder named with the timestamp, so it'll be unique (luckily)
-    await FileSystem.makeDirectoryAsync(folderPath, {
-      intermediates: true
-    })
-
-    // we copy the audio file (if present) to the folder just created
-    await FileSystem.copyAsync({
-      from: pathToRecordingsFolder + tmpRecording.audioUri,
-      to: `${folderPath}/${tmpRecording.audioUri}`,
-    });
-
-    // we copy the image file (if present) to the folder just created
-    if (tmpRecording.imageUri) {
-      await FileSystem.copyAsync({
-        from: pathToImagesFolder + tmpRecording.imageUri,
-        to: `${folderPath}/${tmpRecording.imageUri}`,
-      });
-    }
-
-    // remove useless info from exported json
-    delete tmpRecording.audioUri
-    delete tmpRecording.imageUri
-
-    // we create the json file with all the infos.
-    await FileSystem.writeAsStringAsync(
-      `${folderPath}/Info.json`,
-      JSON.stringify(tmpRecording),
-      options,
-    );
-
-    // we zip the folder with all the infos
-    await zipFolder(folderPath, `${folderPath}.zip`)
-
-    // we open the share dialog
-    await showExportDialog()
-
-  } catch (e) {
-    console.log(e, 'error while creating zip file')
-  } finally {
-
-    // in the end we delete the newly created folder
-    // just the folder, not the zipped file
-    await FileSystem.deleteAsync(folderPath, {
-      idempotent: true
-    })
-  }
-}

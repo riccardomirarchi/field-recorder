@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useLayoutEffect, useEffect, useRef, useContext } from 'react';
 import {
   View,
   FlatList,
@@ -7,7 +7,7 @@ import {
   Animated,
   TouchableWithoutFeedback,
   Platform,
-  TextInput
+  TextInput,
 } from 'react-native';
 import { Audio } from 'expo-av';
 import PhotoModal from '@components/recordingDetails/photoModal';
@@ -16,12 +16,18 @@ import DeleteButton from '@components/recordingDetails/deleteButton';
 import { useIsFocused } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import styles from '@styles/styles';
-import { pathToRecordingsFolder, exportRecording } from '@utils/recordings';
+import { pathToRecordingsFolder, RecordingsContext } from '@utils/recordings';
 import Spinner from 'react-native-loading-spinner-overlay';
 import EventItemCard from '@components/recordingDetails/EventItemCard';
 import CustomShareIcon from '../navigation/CustomShareIcon';
 
 const RecordingDetails = ({ route, navigation }) => {
+
+  const {
+    utils: { EXPORT_RECORDING, RENAME_RECORDING },
+  } = useContext(RecordingsContext);
+
+
   const {
     params: { recording },
   } = route;
@@ -36,17 +42,24 @@ const RecordingDetails = ({ route, navigation }) => {
   const [position, setPosition] = useState(0);
   const animation = useRef(new Animated.Value(0)).current;
   const [highlighted, setHighlighted] = useState()
+  const [title, setTitle] = useState(recording.recordingName)
 
   useEffect(() => {
     if (!isFocused && soundObject) soundObject.unloadAsync();
   }, [isFocused]);
 
   useEffect(() => {
+    bootstrapAudio();
+  }, [])
+
+  useLayoutEffect(() => {
     navigation.setOptions({
       ...Platform.select({
         android: {
           headerRight: () => (
-            <TouchableWithoutFeedback onPress={() => exportRecording(recording)}>
+            <TouchableWithoutFeedback onPress={async () => {
+              await EXPORT_RECORDING(recording, setIsLoading);
+            }}>
               <View style={{ marginRight: 20 }}>
                 <Icon name={'export'} size={27} color={'#fff'} />
               </View>
@@ -55,26 +68,33 @@ const RecordingDetails = ({ route, navigation }) => {
         },
         ios: {
           headerRight: () => (
-            <CustomShareIcon onPress={() => exportRecording(recording)} />
+            <CustomShareIcon onPress={async () => {
+              await EXPORT_RECORDING(recording, setIsLoading);
+            }} />
           ),
         },
       }),
       headerTitle: () => (
-        // to do: make it effectively change the name of the recording 
         <TextInput
-          value={recording.recordingName}
+          value={title}
+          onChangeText={(val) => setTitle(val)}
           style={{
             fontSize: 22,
             color: '#FFF',
-            fontWeight: '600'
+            fontWeight: '600',
+            width: 250
           }}
+          placeholder="Recording..."
+          placeholderTextColor={'rgba(255, 255, 255, 0.5)'}
+          returnKeyType="go"
+          textContentType="none"
+          cancelButtonTitle="Cancel"
+          onEndEditing={({ nativeEvent: { text } }) => RENAME_RECORDING(text, recording)}
         />
       )
     });
 
-    bootstrapAudio();
-
-  }, []);
+  }, [navigation, title]);
 
   const bootstrapAudio = async () => {
     try {
@@ -205,6 +225,7 @@ const RecordingDetails = ({ route, navigation }) => {
       ListHeaderComponent={
         <View>
           <View style={styles.itemContainer}>
+
             <PlayerComponent
               playing={playing}
               animation={animation}

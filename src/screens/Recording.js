@@ -86,7 +86,7 @@ const Recording = ({ navigation }) => {
               return (
                 !canSave && (
                   <TouchableWithoutFeedback onPress={() => showMicOffAlert()}>
-                    <View style={{ left: 10, padding: 2 }} >
+                    <View style={{ left: 10, padding: 2, marginHorizontal: 10 }} >
                       <Ionicon name={'mic-off'} size={26} color={'#8b0000'} />
                     </View>
                   </TouchableWithoutFeedback>
@@ -112,7 +112,7 @@ const Recording = ({ navigation }) => {
   }, [focused]);
 
   const showMicOffAlert = () => {
-    Alert.alert('Information', 'This icon means that the audio file won\'t be saved in the device. If you want to save it you can change it in the Setting page.', [
+    Alert.alert('Information', 'This icon means that the audio file won\'t be saved in the device storage. If you want to keep the file you can change the setting in the Settings page.', [
       { text: 'Cancel' },
       { text: 'Go to Settings', onPress: () => navigation.jumpTo('SettingsStack'), style: 'cancel' },
     ]);
