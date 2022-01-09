@@ -1,18 +1,36 @@
-import React, { useContext, useEffect, useRef, useState, useLayoutEffect } from 'react';
-import { FlatList, View, Text, Animated, Platform, TouchableWithoutFeedback } from 'react-native';
+import React, {
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  useLayoutEffect,
+} from 'react';
+import {
+  FlatList,
+  View,
+  Text,
+  Animated,
+  Platform,
+  TouchableWithoutFeedback,
+} from 'react-native';
 import styles from '@styles/styles';
 import CardItem from '@components/library/CardItem';
-import { RecordingsContext } from '@utils/recordings';
+import {RecordingsContext} from '@utils/recordings';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useIsFocused } from '@react-navigation/native';
+import {useIsFocused} from '@react-navigation/native';
 import CustomShareIcon from '@navigation/CustomShareIcon';
 
-const Library = ({ navigation, route }) => {
+const Library = ({navigation, route}) => {
   const focused = useIsFocused();
   const animation = useRef(new Animated.Value(0)).current;
 
-  const [selectionOpened, setOpened] = useState(false)
-  const [selectedIndexes, setIndexes] = useState([])
+  const [selectionOpened, setOpened] = useState(false);
+  const [selectedIndexes, setIndexes] = useState([]);
+
+  const marginRight = animation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-55, 2],
+  });
 
   const openSelection = () => {
     Animated.timing(animation, {
@@ -20,7 +38,7 @@ const Library = ({ navigation, route }) => {
       duration: 200,
       useNativeDriver: false,
     }).start(() => setOpened(true));
-  }
+  };
 
   const closeSelection = () => {
     Animated.timing(animation, {
@@ -29,9 +47,9 @@ const Library = ({ navigation, route }) => {
       useNativeDriver: false,
     }).start(() => {
       setOpened(false);
-      setIndexes([])
+      setIndexes([]);
     });
-  }
+  };
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -39,26 +57,51 @@ const Library = ({ navigation, route }) => {
         android: {
           headerLeft: () => {
             return (
-              selectionOpened && (
-                <TouchableWithoutFeedback onPress={closeSelection}>
-                  <View style={{ left: 22, bottom: 22 }} >
-                    <Text style={{
+              <TouchableWithoutFeedback onPress={closeSelection}>
+                <Animated.View
+                  style={{
+                    left: 12,
+                    padding: 10,
+                    bottom: 0,
+                    opacity: animation,
+                    marginRight,
+                  }}>
+                  <Text
+                    style={{
                       fontSize: 16,
                       color: '#FFF',
                       fontWeight: '600',
-                    }} >Done</Text>
-                  </View>
-                </TouchableWithoutFeedback>
-              )
-            )
+                    }}>
+                    Done
+                  </Text>
+                </Animated.View>
+              </TouchableWithoutFeedback>
+            );
           },
           headerRight: () => (
-            <TouchableWithoutFeedback onPress={async () => {
-              await EXPORT_RECORDINGS(getRecordingToShare());
-            }}>
-              <View style={{ marginRight: 20 }}>
+            <TouchableWithoutFeedback
+              onPress={async () => {
+                await EXPORT_RECORDINGS(getRecordingToShare());
+              }}>
+              <Animated.View
+                style={{
+                  marginRight: 20,
+                  opacity: animation,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    color: '#FFF',
+                    fontWeight: '600',
+                    marginRight: 5,
+                    bottom: 0.5,
+                  }}>
+                  {selectedIndexes.length}
+                </Text>
                 <Icon name={'export'} size={27} color={'#fff'} />
-              </View>
+              </Animated.View>
             </TouchableWithoutFeedback>
           ),
         },
@@ -66,31 +109,37 @@ const Library = ({ navigation, route }) => {
           headerLeft: () => {
             return (
               <TouchableWithoutFeedback onPress={closeSelection}>
-                <Animated.View style={{ left: 22, bottom: 22, opacity: animation }} >
-                  <Text style={{
-                    fontSize: 18,
-                    color: '#FFF',
-                    fontWeight: '600',
-                  }} >Done</Text>
+                <Animated.View
+                  style={{left: 22, bottom: 22, opacity: animation}}>
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      color: '#FFF',
+                      fontWeight: '600',
+                    }}>
+                    Done
+                  </Text>
                 </Animated.View>
               </TouchableWithoutFeedback>
-            )
+            );
           },
           headerRight: () => (
-            <Animated.View style={{ top: 12, opacity: animation }}>
-              <CustomShareIcon onPress={async () => {
-                await EXPORT_RECORDINGS(getRecordingToShare());
-              }} />
+            <Animated.View style={{top: 12, opacity: animation}}>
+              <CustomShareIcon
+                onPress={async () => {
+                  await EXPORT_RECORDINGS(getRecordingToShare());
+                }}
+              />
             </Animated.View>
           ),
         },
       }),
-    })
-  }, [selectedIndexes])
+    });
+  }, [selectedIndexes]);
 
   const getRecordingToShare = () => {
-    return selectedIndexes.map(index => recordings[index])
-  }
+    return selectedIndexes.map(index => recordings[index]);
+  };
 
   useEffect(() => {
     if (route.params?.recording && focused) {
@@ -103,12 +152,22 @@ const Library = ({ navigation, route }) => {
   }, [route.params?.recording]);
 
   const {
-    state: { recordings },
-    utils: { EXPORT_RECORDINGS }
+    state: {recordings},
+    utils: {EXPORT_RECORDINGS},
   } = useContext(RecordingsContext);
 
-  const _renderItem = ({ item, index }) => {
-    return <CardItem item={item} openSelection={openSelection} selectionOpened={selectionOpened} animation={animation} index={index} setIndexes={setIndexes} selectedIndexes={selectedIndexes} />;
+  const _renderItem = ({item, index}) => {
+    return (
+      <CardItem
+        item={item}
+        openSelection={openSelection}
+        selectionOpened={selectionOpened}
+        animation={animation}
+        index={index}
+        setIndexes={setIndexes}
+        selectedIndexes={selectedIndexes}
+      />
+    );
   };
 
   return (
@@ -119,8 +178,10 @@ const Library = ({ navigation, route }) => {
       contentContainerStyle={styles.container}
       ListEmptyComponent={() => {
         return (
-          <View style={{ alignItems: 'center', flex: 1, paddingTop: 30 }}>
-            <Text style={{ color: '#4f4f4f' }} >You don't have any recording yet.</Text>
+          <View style={{alignItems: 'center', flex: 1, paddingTop: 30}}>
+            <Text style={{color: '#4f4f4f'}}>
+              You don't have any recording yet.
+            </Text>
           </View>
         );
       }}

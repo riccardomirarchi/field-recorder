@@ -1,4 +1,10 @@
-import React, { useState, useLayoutEffect, useEffect, useRef, useContext } from 'react';
+import React, {
+  useState,
+  useLayoutEffect,
+  useEffect,
+  useRef,
+  useContext,
+} from 'react';
 import {
   View,
   FlatList,
@@ -8,28 +14,27 @@ import {
   TouchableWithoutFeedback,
   Platform,
   TextInput,
+  Alert,
 } from 'react-native';
-import { Audio } from 'expo-av';
+import {Audio} from 'expo-av';
 import PhotoModal from '@components/recordingDetails/photoModal';
 import PlayerComponent from '@components/recordingDetails/playerComponent';
 import DeleteButton from '@components/recordingDetails/deleteButton';
-import { useIsFocused } from '@react-navigation/native';
+import {useIsFocused} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import styles from '@styles/styles';
-import { pathToRecordingsFolder, RecordingsContext } from '@utils/recordings';
+import {pathToRecordingsFolder, RecordingsContext} from '@utils/recordings';
 import Spinner from 'react-native-loading-spinner-overlay';
 import EventItemCard from '@components/recordingDetails/EventItemCard';
 import CustomShareIcon from '../navigation/CustomShareIcon';
 
-const RecordingDetails = ({ route, navigation }) => {
-
+const RecordingDetails = ({route, navigation}) => {
   const {
-    utils: { EXPORT_RECORDINGS, RENAME_RECORDING },
+    utils: {EXPORT_RECORDINGS, RENAME_RECORDING},
   } = useContext(RecordingsContext);
 
-
   const {
-    params: { recording },
+    params: {recording},
   } = route;
 
   const isFocused = useIsFocused();
@@ -41,26 +46,28 @@ const RecordingDetails = ({ route, navigation }) => {
   const [playing, setPlaying] = useState(false);
   const [position, setPosition] = useState(0);
   const animation = useRef(new Animated.Value(0)).current;
-  const [highlighted, setHighlighted] = useState()
-  const [title, setTitle] = useState(recording.recordingName)
+  const [highlighted, setHighlighted] = useState();
+  const [title, setTitle] = useState(recording.recordingName);
 
   useEffect(() => {
     if (!isFocused && soundObject) soundObject.unloadAsync();
   }, [isFocused]);
 
   useEffect(() => {
-    bootstrapAudio();
-  }, [])
+    if (recording.audioUri) bootstrapAudio();
+    else setIsLoading(false);
+  }, []);
 
   useLayoutEffect(() => {
     navigation.setOptions({
       ...Platform.select({
         android: {
           headerRight: () => (
-            <TouchableWithoutFeedback onPress={async () => {
-              await EXPORT_RECORDINGS([recording]);
-            }}>
-              <View style={{ marginRight: 20 }}>
+            <TouchableWithoutFeedback
+              onPress={async () => {
+                await EXPORT_RECORDINGS([recording]);
+              }}>
+              <View style={{marginRight: 20}}>
                 <Icon name={'export'} size={27} color={'#fff'} />
               </View>
             </TouchableWithoutFeedback>
@@ -68,32 +75,35 @@ const RecordingDetails = ({ route, navigation }) => {
         },
         ios: {
           headerRight: () => (
-            <CustomShareIcon onPress={async () => {
-              await EXPORT_RECORDINGS([recording]);
-            }} />
+            <CustomShareIcon
+              onPress={async () => {
+                await EXPORT_RECORDINGS([recording]);
+              }}
+            />
           ),
         },
       }),
       headerTitle: () => (
         <TextInput
           value={title}
-          onChangeText={(val) => setTitle(val)}
+          onChangeText={val => setTitle(val)}
           style={{
             fontSize: 22,
             color: '#FFF',
             fontWeight: '600',
-            width: Platform.OS == 'android' ? 250 : null
+            width: Platform.OS == 'android' ? 250 : null,
           }}
           placeholder="Recording..."
           placeholderTextColor={'rgba(255, 255, 255, 0.5)'}
           returnKeyType="go"
           textContentType="none"
           cancelButtonTitle="Cancel"
-          onEndEditing={({ nativeEvent: { text } }) => RENAME_RECORDING(text, recording)}
+          onEndEditing={({nativeEvent: {text}}) =>
+            RENAME_RECORDING(text, recording)
+          }
         />
-      )
+      ),
     });
-
   }, [navigation, title]);
 
   const bootstrapAudio = async () => {
@@ -102,8 +112,8 @@ const RecordingDetails = ({ route, navigation }) => {
         allowsRecordingIOS: false,
       });
 
-      const { sound: soundObject } = await Audio.Sound.createAsync(
-        { uri: pathToRecordingsFolder + recording.audioUri },
+      const {sound: soundObject} = await Audio.Sound.createAsync(
+        {uri: pathToRecordingsFolder + recording.audioUri},
         {
           progressUpdateIntervalMillis: 80,
         },
@@ -132,31 +142,33 @@ const RecordingDetails = ({ route, navigation }) => {
     }).start();
   };
 
-  const highlightEvent = (position) => {
-    if (!position) return
+  const highlightEvent = position => {
+    if (!position) return;
     recording.markedEvents.forEach(event => {
-      if (event.millisFromBeginning >= position - 80 && event.millisFromBeginning <= position + 80) {
-        if (highlighted == event) return
-        setHighlighted(event)
-        return
+      if (
+        event.millisFromBeginning >= position - 80 &&
+        event.millisFromBeginning <= position + 80
+      ) {
+        if (highlighted == event) return;
+        setHighlighted(event);
+        return;
       }
     });
-  }
+  };
 
   const _onPlaybackStatusUpdate = async (playbackStatus, soundObject) => {
-
     setPlaying(playbackStatus.isPlaying && !playbackStatus.isBuffering);
 
     setPosition(playbackStatus.positionMillis);
 
     animateTimeline(playbackStatus.positionMillis);
 
-    highlightEvent(playbackStatus.positionMillis)
+    highlightEvent(playbackStatus.positionMillis);
 
     if (playbackStatus.didJustFinish && !playbackStatus.isLooping) {
-      await soundObject.setStatusAsync({ shouldPlay: false, positionMillis: 0 });
+      await soundObject.setStatusAsync({shouldPlay: false, positionMillis: 0});
       animateTimeline(0);
-      setHighlighted()
+      setHighlighted();
     }
   };
 
@@ -187,10 +199,22 @@ const RecordingDetails = ({ route, navigation }) => {
     }
   };
 
-  const _renderItem = ({ item }) => {
+  const _renderItem = ({item}) => {
     return (
-      <EventItemCard item={item} onPress={() => listenFromEvent(item.millisFromBeginning)} highlighted={highlighted} />
+      <EventItemCard
+        item={item}
+        onPress={() =>
+          recording.audioUri
+            ? listenFromEvent(item.millisFromBeginning)
+            : showNoRecordingAlert()
+        }
+        highlighted={highlighted}
+      />
     );
+  };
+
+  const showNoRecordingAlert = () => {
+    Alert.alert('Attention', 'This recording does not contain any audio file.');
   };
 
   if (isLoading)
@@ -198,8 +222,8 @@ const RecordingDetails = ({ route, navigation }) => {
 
   if (error)
     return (
-      <View style={styles.container}>
-        <Text>
+      <View style={[styles.container]}>
+        <Text style={{color: '#4f4f4f', textAlign: 'center'}}>
           An error occured. It was not possible lo load the audio file.
         </Text>
         <View style={styles.itemContainer}>
@@ -217,25 +241,28 @@ const RecordingDetails = ({ route, navigation }) => {
       showsVerticalScrollIndicator={false}
       ListEmptyComponent={() => {
         return (
-          <View style={{ alignItems: 'center', flex: 1, paddingTop: 30 }}>
-            <Text style={{ color: '#4f4f4f' }}>You have marked no events in this timeline.</Text>
+          <View style={{alignItems: 'center', flex: 1, paddingTop: 30}}>
+            <Text style={{color: '#4f4f4f'}}>
+              You have marked no events in this timeline.
+            </Text>
           </View>
         );
       }}
       ListHeaderComponent={
         <View>
           <View style={styles.itemContainer}>
-
             <PlayerComponent
               playing={playing}
               animation={animation}
               onPress={() => (!playing ? listenRecording() : pauseRecording())}
               position={position}
               duration={recording.duration}
+              disabled={!recording.audioUri}
+              onPressDisabled={showNoRecordingAlert}
             />
           </View>
-          <View style={[styles.itemContainer, { paddingTop: 0 }]}>
-            {recording.imageUri &&
+          <View style={[styles.itemContainer, {paddingTop: 0}]}>
+            {recording.imageUri && (
               <>
                 <Button
                   onPress={() => setModalVisible(true)}
@@ -246,7 +273,8 @@ const RecordingDetails = ({ route, navigation }) => {
                   setModalVisible={setModalVisible}
                   imageUri={recording.imageUri}
                 />
-              </>}
+              </>
+            )}
           </View>
         </View>
       }

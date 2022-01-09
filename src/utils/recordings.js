@@ -1,16 +1,15 @@
-import { createContext } from 'react';
-import { Platform } from 'react-native'
+import {createContext} from 'react';
+import {Platform} from 'react-native';
 import * as FileSystem from 'expo-file-system';
-import { Audio } from 'expo-av';
+import {Audio} from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Share from 'react-native-share';
-import { zip as zipFolder } from 'react-native-zip-archive';
+import {zip as zipFolder} from 'react-native-zip-archive';
 
 export const RecordingsContext = createContext();
 
-export const recordingsReducer = ({ recordings }, { type, payload }) => {
+export const recordingsReducer = ({recordings}, {type, payload}) => {
   switch (type) {
-
     case 'ADD_NEW_RECORDING':
       return {
         loading: false,
@@ -47,6 +46,12 @@ export const pathToRecordingsFolder =
 export const pathToImagesFolder = FileSystem.documentDirectory + 'Images/';
 
 export const pathToZippedFolder = FileSystem.documentDirectory + 'Zipped/';
+
+// get settings in storage
+export const getRecordingQuality = async () =>
+  JSON.parse(await AsyncStorage.getItem('recordingQuality'));
+export const getSaveRecordings = async () =>
+  JSON.parse(await AsyncStorage.getItem('saveRecordings'));
 
 export const recordingsMemo = (dispatch, recordings) => ({
   RETRIEVE_RECORDINGS: async () => {
@@ -89,37 +94,41 @@ export const recordingsMemo = (dispatch, recordings) => ({
         );
       }
 
-      // set default (true) settings if none is found on the storage
-      const recordingQuality = JSON.parse(await AsyncStorage.getItem('recordingQuality'))
+      const recordingQuality = await getRecordingQuality();
+      const saveRecordings = await getSaveRecordings();
 
-      if (recordingQuality === null || recordingQuality === undefined) {
-        await AsyncStorage.setItem('recordingQuality', JSON.stringify(true))
-        await AsyncStorage.setItem('saveRecordings', JSON.stringify(true))
-      }
+      if (recordingQuality === null || recordingQuality === undefined)
+        await AsyncStorage.setItem('recordingQuality', JSON.stringify(true));
+
+      if (saveRecordings === null || saveRecordings === undefined)
+        await AsyncStorage.setItem('saveRecordings', JSON.stringify(true));
 
       // here we take a look at the zipped file we have in the file system, if they have been created
       // since more than a month we delete them for getting more free space on the device.
       // this is not crucial, but helps saving space, another approach would be not to save the zipped
       // file in the document directory but in the cache directory, so they will be automatically deleted
       // but we won't have control over it. For now we delete them on our own.
-      const zips = await FileSystem.readDirectoryAsync(pathToZippedFolder)
+      const zips = await FileSystem.readDirectoryAsync(pathToZippedFolder);
 
       const diffInMonths = (end, start) => {
         var timeDiff = Math.abs(end.getTime() - start.getTime());
         return Math.round(timeDiff / (2e3 * 3600 * 365.25));
-      }
+      };
 
       zips.forEach(async element => {
-        const infos = await FileSystem.getInfoAsync(`${pathToZippedFolder}${element}`)
+        const infos = await FileSystem.getInfoAsync(
+          `${pathToZippedFolder}${element}`,
+        );
 
         var d = new Date(0);
         d.setUTCSeconds(infos.modificationTime);
 
         if (diffInMonths(new Date(), d) > 1) {
-          await FileSystem.deleteAsync(`${pathToZippedFolder}${element}`, { idempotent: true })
+          await FileSystem.deleteAsync(`${pathToZippedFolder}${element}`, {
+            idempotent: true,
+          });
         }
-
-      })
+      });
 
       dispatch({
         type: 'RETRIEVE_RECORDINGS',
@@ -135,14 +144,24 @@ export const recordingsMemo = (dispatch, recordings) => ({
     // then it updates the json with all the new recordings' info and the state
 
     return new Promise(async (resolve, reject) => {
-      const audioFileName = newRecording.audioUri.split('/').pop();
+      let audioFileName = null;
       let imageFileName = null;
 
+      const saveRecordings = await getSaveRecordings();
+
       try {
-        await FileSystem.moveAsync({
-          from: newRecording.audioUri,
-          to: pathToRecordingsFolder + audioFileName,
-        });
+        // if we can sav the file we move it in the right directory, otherwise we delete the file from the cache dir
+        if (saveRecordings) {
+          audioFileName = newRecording.audioUri.split('/').pop();
+          await FileSystem.moveAsync({
+            from: newRecording.audioUri,
+            to: pathToRecordingsFolder + audioFileName,
+          });
+        } else {
+          await FileSystem.deleteAsync(newRecording.audioUri, {
+            idempotent: true,
+          });
+        }
 
         if (newRecording.imageUri) {
           imageFileName = newRecording.imageUri.split('/').pop();
@@ -153,7 +172,7 @@ export const recordingsMemo = (dispatch, recordings) => ({
         }
 
         const payload = Object.assign(newRecording, {
-          imageUri: imageFileName ? imageFileName : null,
+          imageUri: imageFileName,
           audioUri: audioFileName,
         });
 
@@ -181,12 +200,13 @@ export const recordingsMemo = (dispatch, recordings) => ({
     return new Promise(async (resolve, reject) => {
       const payload = recordings.filter(item => item !== recordingToBeDeleted);
       try {
-        await FileSystem.deleteAsync(
-          pathToRecordingsFolder + recordingToBeDeleted.audioUri,
-          {
-            idempotent: forceDelete,
-          },
-        );
+        if (recordingToBeDeleted.audioUri)
+          await FileSystem.deleteAsync(
+            pathToRecordingsFolder + recordingToBeDeleted.audioUri,
+            {
+              idempotent: forceDelete,
+            },
+          );
 
         if (recordingToBeDeleted.imageUri)
           await FileSystem.deleteAsync(
@@ -214,40 +234,44 @@ export const recordingsMemo = (dispatch, recordings) => ({
       }
     });
   },
-  EXPORT_RECORDINGS: async (recordings) => {
-    // this function takes a json with the recording info as a param, copy the audio 
-    // and image file (if present) to a newly created folder,then it zip this folder 
-    // and prompt the user to share it. finally it deletes the temporary unzipped 
+  EXPORT_RECORDINGS: async recordings => {
+    // this function takes a json with the recording info as a param, copy the audio
+    // and image file (if present) to a newly created folder,then it zip this folder
+    // and prompt the user to share it. finally it deletes the temporary unzipped
     // folder and keeps the zipped one for later use
 
-    const getZippedUrl = async (recording) => {
-
-      let tmpRecording = { ...recording }
+    const getZippedUrl = async recording => {
+      let tmpRecording = {...recording};
 
       // we must remove the : from the path, since stupid android file system crashes...
-      const folderPath = pathToZippedFolder + `${tmpRecording.initialRecordingTimestamp.split(':').join('_')}`
+      const folderPath =
+        pathToZippedFolder +
+        `${tmpRecording.initialRecordingTimestamp.split(':').join('_')}`;
 
       // we check if the zipped file already exists in the file system
       // if not we create a new one, otherwise we skip and share
-      const zip = await FileSystem.getInfoAsync(`${folderPath}.zip`)
+      const zip = await FileSystem.getInfoAsync(`${folderPath}.zip`);
 
       if (zip.exists) {
-        console.log(`zipped file alreay exists at path ${folderPath}.zip, sharing directly..`)
+        console.log(
+          `zipped file alreay exists at path ${folderPath}.zip, sharing directly..`,
+        );
 
-        return `${folderPath}.zip`
+        return `${folderPath}.zip`;
       }
 
       try {
         // we create a folder named with the timestamp, so it'll be unique (luckily)
         await FileSystem.makeDirectoryAsync(folderPath, {
-          intermediates: true
-        })
+          intermediates: true,
+        });
 
         // we copy the audio file (if present) to the folder just created
-        await FileSystem.copyAsync({
-          from: pathToRecordingsFolder + tmpRecording.audioUri,
-          to: `${folderPath}/${tmpRecording.audioUri}`,
-        });
+        if (tmpRecording.audioUri)
+          await FileSystem.copyAsync({
+            from: pathToRecordingsFolder + tmpRecording.audioUri,
+            to: `${folderPath}/${tmpRecording.audioUri}`,
+          });
 
         // we copy the image file (if present) to the folder just created
         if (tmpRecording.imageUri) {
@@ -258,8 +282,8 @@ export const recordingsMemo = (dispatch, recordings) => ({
         }
 
         // remove useless info from exported json
-        delete tmpRecording.audioUri
-        delete tmpRecording.imageUri
+        delete tmpRecording.audioUri;
+        delete tmpRecording.imageUri;
 
         // we create the json file with all the infos.
         await FileSystem.writeAsStringAsync(
@@ -269,52 +293,49 @@ export const recordingsMemo = (dispatch, recordings) => ({
         );
 
         // we zip the folder with all the infos
-        await zipFolder(folderPath, `${folderPath}.zip`)
-
+        await zipFolder(folderPath, `${folderPath}.zip`);
       } catch (e) {
-        console.log(e, 'error while creating zip file')
-        if (Platform.OS === 'android') setIsLoading(false)
+        console.log(e, 'error while creating zip file');
+        if (Platform.OS === 'android') setIsLoading(false);
       } finally {
-
         // in the end we delete the newly created folder
         // just the folder, not the zipped file
         await FileSystem.deleteAsync(folderPath, {
-          idempotent: true
-        })
+          idempotent: true,
+        });
       }
 
-      return `${folderPath}.zip`
-    }
+      return `${folderPath}.zip`;
+    };
 
     // this function return an array of url, each one of them pointing to the path of the zipped file in the fs
     const getUrls = async () => {
-      return Promise.all(recordings.map(async recording => await getZippedUrl(recording)))
-    }
+      return Promise.all(
+        recordings.map(async recording => await getZippedUrl(recording)),
+      );
+    };
 
     // in the end we share the files
     try {
       await Share.open({
         ...shareOptions,
-        urls: await getUrls()
-      })
+        urls: await getUrls(),
+      });
     } catch (e) {
-      console.log(e, 'error while sharing file')
+      console.log(e, 'error while sharing file');
     }
-
   },
   RENAME_RECORDING: async (newRecordingName, recordingToBeRenamed) => {
-
-    // this is an 'in place' change, so the state will be updated automatically, no need to dispatch 
+    // this is an 'in place' change, so the state will be updated automatically, no need to dispatch
     // an action and update the state manually, we only need to update the recordings in the fs
-    recordingToBeRenamed.recordingName = newRecordingName
+    recordingToBeRenamed.recordingName = newRecordingName;
 
     await FileSystem.writeAsStringAsync(
       pathToJSON,
       JSON.stringify(recordings),
       options,
     );
-
-  }
+  },
 });
 
 // low quality recording presets (default)
@@ -348,7 +369,7 @@ const iosRecordingPresetHighQuality = {
   linearPCMBitDepth: 16,
   linearPCMIsBigEndian: false,
   linearPCMIsFloat: false,
-}
+};
 
 const androidRecordingPresetHighQuality = {
   extension: '.m4a',
@@ -357,21 +378,23 @@ const androidRecordingPresetHighQuality = {
   sampleRate: 44100,
   numberOfChannels: 2,
   bitRate: 320000,
-}
+};
 
 export const LOW_QUALITY_PRESETS = {
   android: androidRecordingPreset,
   ios: iosRecordingPreset,
-}
+};
 
 export const HIGH_QUALITY_PRESETS = {
   android: androidRecordingPresetHighQuality,
   ios: iosRecordingPresetHighQuality,
-}
+};
 
 export const recordingOptions = async () => ({
   isMeteringEnabled: true, // this is crucial for ui metering animations
-  ...JSON.parse(await AsyncStorage.getItem('recordingQuality')) === true ? HIGH_QUALITY_PRESETS : LOW_QUALITY_PRESETS
+  ...(JSON.parse(await AsyncStorage.getItem('recordingQuality')) === true
+    ? HIGH_QUALITY_PRESETS
+    : LOW_QUALITY_PRESETS),
 });
 
 export const formatMillis = millis => {
@@ -380,5 +403,3 @@ export const formatMillis = millis => {
   let s = Math.floor(((millis / 1000 / 60 / 60 - h) * 60 - m) * 60);
   return `${m}:${s < 10 ? '0' : ''}${s}`;
 };
-
-
