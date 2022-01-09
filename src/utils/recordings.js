@@ -99,7 +99,7 @@ export const recordingsMemo = (dispatch, recordings) => ({
 
       // here we take a look at the zipped file we have in the file system, if they have been created
       // since more than a month we delete them for getting more free space on the device.
-      // this is not crucial, but helps save space, another approach would be not to save the zipped
+      // this is not crucial, but helps saving space, another approach would be not to save the zipped
       // file in the document directory but in the cache directory, so they will be automatically deleted
       // but we won't have control over it. For now we delete them on our own.
       const zips = await FileSystem.readDirectoryAsync(pathToZippedFolder)
@@ -214,93 +214,93 @@ export const recordingsMemo = (dispatch, recordings) => ({
       }
     });
   },
-  EXPORT_RECORDING: async (recording, setIsLoading) => {
+  EXPORT_RECORDINGS: async (recordings) => {
     // this function takes a json with the recording info as a param, copy the audio 
     // and image file (if present) to a newly created folder,then it zip this folder 
     // and prompt the user to share it. finally it deletes the temporary unzipped 
     // folder and keeps the zipped one for later use
 
-    if (Platform.OS === 'android') setIsLoading(true)
+    const getZippedUrl = async (recording) => {
 
-    let tmpRecording = { ...recording }
+      let tmpRecording = { ...recording }
 
-    // we must remove the : from the path, since stupid android file system crashes...
-    const folderPath = pathToZippedFolder + `${tmpRecording.initialRecordingTimestamp.split(':').join('_')}`
+      // we must remove the : from the path, since stupid android file system crashes...
+      const folderPath = pathToZippedFolder + `${tmpRecording.initialRecordingTimestamp.split(':').join('_')}`
 
-    const showExportDialog = async () => {
+      // we check if the zipped file already exists in the file system
+      // if not we create a new one, otherwise we skip and share
+      const zip = await FileSystem.getInfoAsync(`${folderPath}.zip`)
 
-      if (Platform.OS === 'android') setIsLoading(false)
+      if (zip.exists) {
+        console.log(`zipped file alreay exists at path ${folderPath}.zip, sharing directly..`)
+
+        return `${folderPath}.zip`
+      }
 
       try {
-        await Share.open({
-          ...shareOptions,
-          url: `${folderPath}.zip`
+        // we create a folder named with the timestamp, so it'll be unique (luckily)
+        await FileSystem.makeDirectoryAsync(folderPath, {
+          intermediates: true
         })
-      } catch (e) {
-        console.log(e, 'error while sharing file')
-      }
-    }
 
-    // we check if the zipped file already exists in the file system
-    // if not we create a new one, otherwise we skip and share
-    const zip = await FileSystem.getInfoAsync(`${folderPath}.zip`)
-
-    if (zip.exists) {
-      console.log('zipped file alreay exists, sharing directly..')
-
-      await showExportDialog()
-
-      return
-    }
-
-    try {
-      // we create a folder named with the timestamp, so it'll be unique (luckily)
-      await FileSystem.makeDirectoryAsync(folderPath, {
-        intermediates: true
-      })
-
-      // we copy the audio file (if present) to the folder just created
-      await FileSystem.copyAsync({
-        from: pathToRecordingsFolder + tmpRecording.audioUri,
-        to: `${folderPath}/${tmpRecording.audioUri}`,
-      });
-
-      // we copy the image file (if present) to the folder just created
-      if (tmpRecording.imageUri) {
+        // we copy the audio file (if present) to the folder just created
         await FileSystem.copyAsync({
-          from: pathToImagesFolder + tmpRecording.imageUri,
-          to: `${folderPath}/${tmpRecording.imageUri}`,
+          from: pathToRecordingsFolder + tmpRecording.audioUri,
+          to: `${folderPath}/${tmpRecording.audioUri}`,
         });
+
+        // we copy the image file (if present) to the folder just created
+        if (tmpRecording.imageUri) {
+          await FileSystem.copyAsync({
+            from: pathToImagesFolder + tmpRecording.imageUri,
+            to: `${folderPath}/${tmpRecording.imageUri}`,
+          });
+        }
+
+        // remove useless info from exported json
+        delete tmpRecording.audioUri
+        delete tmpRecording.imageUri
+
+        // we create the json file with all the infos.
+        await FileSystem.writeAsStringAsync(
+          `${folderPath}/Info.json`,
+          JSON.stringify(tmpRecording),
+          options,
+        );
+
+        // we zip the folder with all the infos
+        await zipFolder(folderPath, `${folderPath}.zip`)
+
+      } catch (e) {
+        console.log(e, 'error while creating zip file')
+        if (Platform.OS === 'android') setIsLoading(false)
+      } finally {
+
+        // in the end we delete the newly created folder
+        // just the folder, not the zipped file
+        await FileSystem.deleteAsync(folderPath, {
+          idempotent: true
+        })
       }
 
-      // remove useless info from exported json
-      delete tmpRecording.audioUri
-      delete tmpRecording.imageUri
-
-      // we create the json file with all the infos.
-      await FileSystem.writeAsStringAsync(
-        `${folderPath}/Info.json`,
-        JSON.stringify(tmpRecording),
-        options,
-      );
-
-      // we zip the folder with all the infos
-      await zipFolder(folderPath, `${folderPath}.zip`)
-
-      // we open the share dialog
-      await showExportDialog()
-
-    } catch (e) {
-      console.log(e, 'error while creating zip file')
-      if (Platform.OS === 'android') setIsLoading(false)
-    } finally {
-
-      // in the end we delete the newly created folder
-      // just the folder, not the zipped file
-      await FileSystem.deleteAsync(folderPath, {
-        idempotent: true
-      })
+      return `${folderPath}.zip`
     }
+
+    // this function return an array of url, each one of them pointing to the path of the zipped file in the fs
+    const getUrls = async () => {
+      return Promise.all(recordings.map(async recording => await getZippedUrl(recording)))
+    }
+
+    // in the end we share the files
+    try {
+      await Share.open({
+        ...shareOptions,
+        urls: await getUrls()
+      })
+    } catch (e) {
+      console.log(e, 'error while sharing file')
+    }
+
   },
   RENAME_RECORDING: async (newRecordingName, recordingToBeRenamed) => {
 

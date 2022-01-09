@@ -1,12 +1,96 @@
-import React, { useContext, useEffect } from 'react';
-import { FlatList, View, Text } from 'react-native';
+import React, { useContext, useEffect, useRef, useState, useLayoutEffect } from 'react';
+import { FlatList, View, Text, Animated, Platform, TouchableWithoutFeedback } from 'react-native';
 import styles from '@styles/styles';
 import CardItem from '@components/library/CardItem';
 import { RecordingsContext } from '@utils/recordings';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useIsFocused } from '@react-navigation/native';
+import CustomShareIcon from '@navigation/CustomShareIcon';
 
 const Library = ({ navigation, route }) => {
   const focused = useIsFocused();
+  const animation = useRef(new Animated.Value(0)).current;
+
+  const [selectionOpened, setOpened] = useState(false)
+  const [selectedIndexes, setIndexes] = useState([])
+
+  const openSelection = () => {
+    Animated.timing(animation, {
+      toValue: 1,
+      duration: 200,
+      useNativeDriver: false,
+    }).start(() => setOpened(true));
+  }
+
+  const closeSelection = () => {
+    Animated.timing(animation, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: false,
+    }).start(() => {
+      setOpened(false);
+      setIndexes([])
+    });
+  }
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      ...Platform.select({
+        android: {
+          headerLeft: () => {
+            return (
+              selectionOpened && (
+                <TouchableWithoutFeedback onPress={closeSelection}>
+                  <View style={{ left: 22, bottom: 22 }} >
+                    <Text style={{
+                      fontSize: 16,
+                      color: '#FFF',
+                      fontWeight: '600',
+                    }} >Done</Text>
+                  </View>
+                </TouchableWithoutFeedback>
+              )
+            )
+          },
+          headerRight: () => (
+            <TouchableWithoutFeedback onPress={async () => {
+              await EXPORT_RECORDINGS(getRecordingToShare());
+            }}>
+              <View style={{ marginRight: 20 }}>
+                <Icon name={'export'} size={27} color={'#fff'} />
+              </View>
+            </TouchableWithoutFeedback>
+          ),
+        },
+        ios: {
+          headerLeft: () => {
+            return (
+              <TouchableWithoutFeedback onPress={closeSelection}>
+                <Animated.View style={{ left: 22, bottom: 22, opacity: animation }} >
+                  <Text style={{
+                    fontSize: 18,
+                    color: '#FFF',
+                    fontWeight: '600',
+                  }} >Done</Text>
+                </Animated.View>
+              </TouchableWithoutFeedback>
+            )
+          },
+          headerRight: () => (
+            <Animated.View style={{ top: 12, opacity: animation }}>
+              <CustomShareIcon onPress={async () => {
+                await EXPORT_RECORDINGS(getRecordingToShare());
+              }} />
+            </Animated.View>
+          ),
+        },
+      }),
+    })
+  }, [selectedIndexes])
+
+  const getRecordingToShare = () => {
+    return selectedIndexes.map(index => recordings[index])
+  }
 
   useEffect(() => {
     if (route.params?.recording && focused) {
@@ -20,17 +104,17 @@ const Library = ({ navigation, route }) => {
 
   const {
     state: { recordings },
+    utils: { EXPORT_RECORDINGS }
   } = useContext(RecordingsContext);
 
-  const _renderItem = ({ item }) => {
-    return <CardItem item={item} />;
+  const _renderItem = ({ item, index }) => {
+    return <CardItem item={item} openSelection={openSelection} selectionOpened={selectionOpened} animation={animation} index={index} setIndexes={setIndexes} selectedIndexes={selectedIndexes} />;
   };
 
   return (
     <FlatList
       data={recordings}
       renderItem={_renderItem}
-      // onScroll={({nativeEvent}) => console.log(nativeEvent.contentOffset.y)}
       keyExtractor={item => item.initialRecordingTimestamp}
       contentContainerStyle={styles.container}
       ListEmptyComponent={() => {

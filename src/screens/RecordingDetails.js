@@ -24,7 +24,7 @@ import CustomShareIcon from '../navigation/CustomShareIcon';
 const RecordingDetails = ({ route, navigation }) => {
 
   const {
-    utils: { EXPORT_RECORDING, RENAME_RECORDING },
+    utils: { EXPORT_RECORDINGS, RENAME_RECORDING },
   } = useContext(RecordingsContext);
 
 
@@ -58,7 +58,7 @@ const RecordingDetails = ({ route, navigation }) => {
         android: {
           headerRight: () => (
             <TouchableWithoutFeedback onPress={async () => {
-              await EXPORT_RECORDING(recording, setIsLoading);
+              await EXPORT_RECORDINGS([recording]);
             }}>
               <View style={{ marginRight: 20 }}>
                 <Icon name={'export'} size={27} color={'#fff'} />
@@ -69,7 +69,7 @@ const RecordingDetails = ({ route, navigation }) => {
         ios: {
           headerRight: () => (
             <CustomShareIcon onPress={async () => {
-              await EXPORT_RECORDING(recording, setIsLoading);
+              await EXPORT_RECORDINGS([recording]);
             }} />
           ),
         },
