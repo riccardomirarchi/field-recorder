@@ -214,7 +214,13 @@ const RecordingDetails = ({route, navigation}) => {
       const position = millis - playbackOffset * 1000;
 
       await soundObject.playFromPositionAsync(position <= 0 ? 0 : position);
-      console.log('started listening event from ', millis);
+      console.log(
+        'started listening event from ',
+        millis,
+        'with',
+        playbackOffset,
+        'seconds of offset',
+      );
     } catch (e) {
       console.log('error', e);
     }
