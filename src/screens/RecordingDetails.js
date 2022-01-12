@@ -15,6 +15,7 @@ import {
   Platform,
   TextInput,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import {Audio} from 'expo-av';
 import PhotoModal from '@components/recordingDetails/photoModal';
@@ -23,7 +24,11 @@ import DeleteButton from '@components/recordingDetails/deleteButton';
 import {useIsFocused} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import styles from '@styles/styles';
-import {pathToRecordingsFolder, RecordingsContext} from '@utils/recordings';
+import {
+  pathToRecordingsFolder,
+  RecordingsContext,
+  getPlaybackOffset,
+} from '@utils/recordings';
 import Spinner from 'react-native-loading-spinner-overlay';
 import EventItemCard from '@components/recordingDetails/EventItemCard';
 import CustomShareIcon from '../navigation/CustomShareIcon';
@@ -49,6 +54,10 @@ const RecordingDetails = ({route, navigation}) => {
   const [highlighted, setHighlighted] = useState();
   const [title, setTitle] = useState(recording.recordingName);
 
+  const [playbackOffset, setPlaybackOffset] = useState(0);
+
+  const [isProcessingExport, setIsProcessingExport] = useState(false);
+
   useEffect(() => {
     if (!isFocused && soundObject) soundObject.unloadAsync();
   }, [isFocused]);
@@ -56,6 +65,12 @@ const RecordingDetails = ({route, navigation}) => {
   useEffect(() => {
     if (recording.audioUri) bootstrapAudio();
     else setIsLoading(false);
+
+    const getOffset = async () => {
+      setPlaybackOffset(await getPlaybackOffset());
+    };
+
+    getOffset();
   }, []);
 
   useLayoutEffect(() => {
@@ -65,10 +80,14 @@ const RecordingDetails = ({route, navigation}) => {
           headerRight: () => (
             <TouchableWithoutFeedback
               onPress={async () => {
-                await EXPORT_RECORDINGS([recording]);
+                await EXPORT_RECORDINGS([recording], setIsProcessingExport);
               }}>
               <View style={{marginRight: 20}}>
-                <Icon name={'export'} size={27} color={'#fff'} />
+                {!isProcessingExport ? (
+                  <Icon name={'export'} size={27} color={'#fff'} />
+                ) : (
+                  <ActivityIndicator size="large" color={'#fff'} />
+                )}
               </View>
             </TouchableWithoutFeedback>
           ),
@@ -77,7 +96,7 @@ const RecordingDetails = ({route, navigation}) => {
           headerRight: () => (
             <CustomShareIcon
               onPress={async () => {
-                await EXPORT_RECORDINGS([recording]);
+                await EXPORT_RECORDINGS([recording], setIsProcessingExport);
               }}
             />
           ),
@@ -104,7 +123,7 @@ const RecordingDetails = ({route, navigation}) => {
         />
       ),
     });
-  }, [navigation, title]);
+  }, [navigation, title, isProcessingExport]);
 
   const bootstrapAudio = async () => {
     try {
@@ -192,8 +211,10 @@ const RecordingDetails = ({route, navigation}) => {
 
   const listenFromEvent = async millis => {
     try {
-      await soundObject.playFromPositionAsync(millis - 10);
-      console.log('started listening event from ', millis - 10);
+      const position = millis - playbackOffset * 1000;
+
+      await soundObject.playFromPositionAsync(position <= 0 ? 0 : position);
+      console.log('started listening event from ', millis);
     } catch (e) {
       console.log('error', e);
     }
@@ -266,7 +287,7 @@ const RecordingDetails = ({route, navigation}) => {
               <>
                 <Button
                   onPress={() => setModalVisible(true)}
-                  title={'Open Photo'}
+                  title={'Show Photo'}
                 />
                 <PhotoModal
                   modalVisible={modalVisible}

@@ -1,13 +1,20 @@
-import React, { useRef, useState } from 'react';
-import { Animated, TouchableWithoutFeedback, Text, View } from 'react-native';
+import React, {useRef, useState} from 'react';
+import {Animated, TouchableWithoutFeedback, Text, View} from 'react-native';
 import flatlistContainerStyle from '@styles/styles';
 import Icon from 'react-native-vector-icons/AntDesign';
 import EventPlayer from './EventPlayer';
-import { formatMillis } from '@utils/recordings';
+import {formatMillis} from '@utils/recordings';
 
 const AnimatedIcon = Animated.createAnimatedComponent(Icon);
 
-const EventCardItem = ({ item, duration, isRecording, audioUri, index, setMarkedEvents }) => {
+const EventCardItem = ({
+  item,
+  duration,
+  isRecording,
+  audioUri,
+  index,
+  setMarkedEvents,
+}) => {
   const [opened, setOpened] = useState(false);
   const openingAnimation = useRef(new Animated.Value(0)).current;
 
@@ -55,7 +62,7 @@ const EventCardItem = ({ item, duration, isRecording, audioUri, index, setMarked
         }}>
         <View style={flatlistContainerStyle.innerViewStyle}>
           <Text
-            style={[flatlistContainerStyle.cardItemTextStyle, { paddingTop: 4 }]}>
+            style={[flatlistContainerStyle.cardItemTextStyle, {paddingTop: 4}]}>
             {`${item.title}  -  ${formatMillis(item.millisFromBeginning)}`}
           </Text>
 
@@ -69,25 +76,33 @@ const EventCardItem = ({ item, duration, isRecording, audioUri, index, setMarked
           />
         </View>
       </TouchableWithoutFeedback>
-      <Animated.View style={{
-        opacity: openingAnimation.interpolate({
-          inputRange: [0, 1],
-          outputRange: [-5, 1]
-        }),
-        position: 'absolute',
-        zIndex: openingAnimation.interpolate({
-          inputRange: [0, 1],
-          outputRange: [-1, 1]
-        }),
-        height: openingAnimation.interpolate({
-          inputRange: [0, 1],
-          outputRange: [0, 180]
-        }),
-        // backgroundColor: 'blue',
-        paddingVertical: 0
-
-      }}>
-        <EventPlayer event={item} opened={opened} duration={duration} isRecording={isRecording} audioUri={audioUri} index={index} setMarkedEvents={setMarkedEvents} />
+      <Animated.View
+        style={{
+          opacity: openingAnimation.interpolate({
+            inputRange: [0, 1],
+            outputRange: [-5, 1],
+          }),
+          position: 'absolute',
+          zIndex: openingAnimation.interpolate({
+            inputRange: [0, 1],
+            outputRange: [-1, 1],
+          }),
+          height: openingAnimation.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, 180],
+          }),
+          // backgroundColor: 'blue',
+          paddingVertical: 0,
+        }}>
+        <EventPlayer
+          event={item}
+          opened={opened}
+          duration={duration}
+          isRecording={isRecording}
+          audioUri={audioUri}
+          index={index}
+          setMarkedEvents={setMarkedEvents}
+        />
       </Animated.View>
     </Animated.View>
   );

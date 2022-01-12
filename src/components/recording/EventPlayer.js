@@ -1,16 +1,21 @@
-import React, { useRef, useState, useEffect } from 'react';
-import {
-  View,
-  Animated,
-  Alert
-} from 'react-native';
-import { utilsStyles } from '@styles/styles';
+import React, {useRef, useState, useEffect} from 'react';
+import {View, Animated, Alert} from 'react-native';
+import {utilsStyles} from '@styles/styles';
 import PlayerComponent from '@components/recordingDetails/playerComponent';
 
-import { Audio } from 'expo-av';
+import {Audio} from 'expo-av';
 import Input from '@components/common/Input';
+import {getPlaybackOffset} from '../../utils/recordings';
 
-const EventPlayer = ({ event, opened, duration, isRecording, audioUri, index, setMarkedEvents }) => {
+const EventPlayer = ({
+  event,
+  opened,
+  duration,
+  isRecording,
+  audioUri,
+  index,
+  setMarkedEvents,
+}) => {
   useEffect(() => {
     if (opened && !isRecording) {
       bootstrapAudio();
@@ -20,6 +25,16 @@ const EventPlayer = ({ event, opened, duration, isRecording, audioUri, index, se
       }
     }
   }, [opened, isRecording]);
+
+  useEffect(() => {
+    const getOffset = async () => {
+      setPlaybackOffset(await getPlaybackOffset());
+    };
+
+    getOffset();
+  }, []);
+
+  const [playbackOffset, setPlaybackOffset] = useState(0);
 
   const [eventTitle, setTitle] = useState(event?.title);
   const [description, setDescription] = useState(event?.description);
@@ -32,14 +47,13 @@ const EventPlayer = ({ event, opened, duration, isRecording, audioUri, index, se
   const descriptionInput = useRef();
 
   const updateEvents = () => {
-
     setMarkedEvents(events => {
-      events[index].title = eventTitle
-      events[index].description = description
+      events[index].title = eventTitle;
+      events[index].description = description;
 
-      return events
-    })
-  }
+      return events;
+    });
+  };
 
   const bootstrapAudio = async () => {
     try {
@@ -47,8 +61,8 @@ const EventPlayer = ({ event, opened, duration, isRecording, audioUri, index, se
         allowsRecordingIOS: false,
       });
 
-      const { sound: soundObject } = await Audio.Sound.createAsync(
-        { uri: audioUri },
+      const {sound: soundObject} = await Audio.Sound.createAsync(
+        {uri: audioUri},
         {
           progressUpdateIntervalMillis: 80,
           positionMillis: event?.millisFromBeginning,
@@ -87,24 +101,14 @@ const EventPlayer = ({ event, opened, duration, isRecording, audioUri, index, se
 
   const listenRecording = async () => {
     try {
-      await soundObject.playFromPositionAsync(event?.millisFromBeginning);
+      const position = event?.millisFromBeginning - playbackOffset * 1000;
+
+      await soundObject.playFromPositionAsync(position <= 0 ? 0 : position);
       console.log('started listening');
     } catch (e) {
       console.log('error', e);
     }
   };
-
-  // const closeAndSave = () => {
-  //   const newEvents = markedEvents;
-  //   newEvents[index] = {
-  //     title: eventTitle,
-  //     millisFromBeginning: event?.millisFromBeginning,
-  //     description,
-  //   };
-  //   setMarkedEvents(newEvents);
-  //   setModalVisible(false);
-  //   soundObject.unloadAsync();
-  // };
 
   const stopAndSetToEvent = async () => {
     try {
@@ -119,7 +123,6 @@ const EventPlayer = ({ event, opened, duration, isRecording, audioUri, index, se
   };
 
   const animateTimeline = position => {
-
     if (position === undefined || position <= 0) {
       return;
     }
@@ -134,22 +137,25 @@ const EventPlayer = ({ event, opened, duration, isRecording, audioUri, index, se
 
   return (
     <View>
-      <View style={[utilsStyles.ph25, { width: 335 }]}>
-        <View style={{ marginVertical: 20 }} >
+      <View style={[utilsStyles.ph25, {width: 335}]}>
+        <View style={{marginVertical: 20}}>
           <PlayerComponent
             playing={playing}
             animation={animation}
-            onPress={() =>
-              playing ? stopAndSetToEvent() : listenRecording()
+            onPress={() => (playing ? stopAndSetToEvent() : listenRecording())}
+            onPressDisabled={() =>
+              Alert.alert(
+                'Attention',
+                'You cannot play this event because the recording is still going. Stop the recording and come back!',
+              )
             }
-            onPressDisabled={() => Alert.alert('Attention', 'You cannot play this event because the recording is still going. Stop the recording and come back!')}
             disabled={isRecording}
             position={position}
             duration={duration}
             fromEvent={true}
             style={{
               width: 200,
-              playerWidth: 160
+              playerWidth: 160,
             }}
           />
         </View>

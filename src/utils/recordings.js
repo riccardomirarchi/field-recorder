@@ -1,5 +1,4 @@
 import {createContext} from 'react';
-import {Platform} from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import {Audio} from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -8,24 +7,42 @@ import {zip as zipFolder} from 'react-native-zip-archive';
 
 export const RecordingsContext = createContext();
 
-export const recordingsReducer = ({recordings}, {type, payload}) => {
+export const recordingsReducer = (
+  {recordings, hasWaitingRec},
+  {type, payload},
+) => {
   switch (type) {
     case 'ADD_NEW_RECORDING':
       return {
         loading: false,
         recordings: [...recordings, payload],
+        hasWaitingRec,
       };
 
     case 'DELETE_RECORDING':
       return {
         loading: false,
         recordings: payload,
+        hasWaitingRec,
       };
 
     case 'RETRIEVE_RECORDINGS':
       return {
         loading: false,
         recordings: payload,
+        hasWaitingRec,
+      };
+    case 'ADD_WAITING_RECORDING':
+      return {
+        loading: false,
+        recordings,
+        hasWaitingRec: payload.hasWaitingRec,
+      };
+    case 'REMOVE_WAITING_RECORDING':
+      return {
+        loading: false,
+        recordings,
+        hasWaitingRec: payload.hasWaitingRec,
       };
   }
 };
@@ -52,6 +69,9 @@ export const getRecordingQuality = async () =>
   JSON.parse(await AsyncStorage.getItem('recordingQuality'));
 export const getSaveRecordings = async () =>
   JSON.parse(await AsyncStorage.getItem('saveRecordings'));
+
+export const getPlaybackOffset = async () =>
+  JSON.parse(await AsyncStorage.getItem('playbackOffset'));
 
 export const recordingsMemo = (dispatch, recordings) => ({
   RETRIEVE_RECORDINGS: async () => {
@@ -96,12 +116,16 @@ export const recordingsMemo = (dispatch, recordings) => ({
 
       const recordingQuality = await getRecordingQuality();
       const saveRecordings = await getSaveRecordings();
+      const playbackOffset = await getPlaybackOffset();
 
       if (recordingQuality === null || recordingQuality === undefined)
         await AsyncStorage.setItem('recordingQuality', JSON.stringify(true));
 
       if (saveRecordings === null || saveRecordings === undefined)
         await AsyncStorage.setItem('saveRecordings', JSON.stringify(true));
+
+      if (playbackOffset === null || playbackOffset === undefined)
+        await AsyncStorage.setItem('playbackOffset', JSON.stringify(0));
 
       // here we take a look at the zipped file we have in the file system, if they have been created
       // since more than a month we delete them for getting more free space on the device.
@@ -234,11 +258,13 @@ export const recordingsMemo = (dispatch, recordings) => ({
       }
     });
   },
-  EXPORT_RECORDINGS: async recordings => {
+  EXPORT_RECORDINGS: async (recordings, setIsProcessingExport) => {
     // this function takes a json with the recording info as a param, copy the audio
     // and image file (if present) to a newly created folder,then it zip this folder
     // and prompt the user to share it. finally it deletes the temporary unzipped
     // folder and keeps the zipped one for later use
+
+    setIsProcessingExport(true);
 
     const getZippedUrl = async recording => {
       let tmpRecording = {...recording};
@@ -296,7 +322,7 @@ export const recordingsMemo = (dispatch, recordings) => ({
         await zipFolder(folderPath, `${folderPath}.zip`);
       } catch (e) {
         console.log(e, 'error while creating zip file');
-        if (Platform.OS === 'android') setIsLoading(false);
+        setIsProcessingExport(false);
       } finally {
         // in the end we delete the newly created folder
         // just the folder, not the zipped file
@@ -317,6 +343,8 @@ export const recordingsMemo = (dispatch, recordings) => ({
 
     // in the end we share the files
     try {
+      setTimeout(() => setIsProcessingExport(false), 500);
+
       await Share.open({
         ...shareOptions,
         urls: await getUrls(),
@@ -336,6 +364,18 @@ export const recordingsMemo = (dispatch, recordings) => ({
       options,
     );
   },
+  ADD_WAITING_RECORDING: () => {
+    dispatch({
+      type: 'ADD_WAITING_RECORDING',
+      payload: {hasWaitingRec: true},
+    });
+  },
+  REMOVE_WAITING_RECORDING: () => {
+    dispatch({
+      type: 'REMOVE_WAITING_RECORDING',
+      payload: {hasWaitingRec: false},
+    });
+  },
 });
 
 // low quality recording presets (default)
@@ -351,12 +391,12 @@ const iosRecordingPreset = {
 };
 
 const androidRecordingPreset = {
-  extension: '.3gp',
-  outputFormat: Audio.RECORDING_OPTION_ANDROID_OUTPUT_FORMAT_THREE_GPP,
-  audioEncoder: Audio.RECORDING_OPTION_ANDROID_AUDIO_ENCODER_AMR_NB,
+  extension: '.m4a',
+  outputFormat: Audio.RECORDING_OPTION_ANDROID_OUTPUT_FORMAT_MPEG_4,
+  audioEncoder: Audio.RECORDING_OPTION_ANDROID_AUDIO_ENCODER_AAC,
   sampleRate: 44100,
-  numberOfChannels: 2,
-  bitRate: 256000,
+  numberOfChannels: 1,
+  bitRate: 96000,
 };
 
 // high quality rec presets
@@ -376,7 +416,7 @@ const androidRecordingPresetHighQuality = {
   outputFormat: Audio.RECORDING_OPTION_ANDROID_OUTPUT_FORMAT_MPEG_4,
   audioEncoder: Audio.RECORDING_OPTION_ANDROID_AUDIO_ENCODER_AAC,
   sampleRate: 44100,
-  numberOfChannels: 2,
+  numberOfChannels: 1,
   bitRate: 320000,
 };
 

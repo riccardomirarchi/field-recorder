@@ -4,7 +4,7 @@ import {Button, PermissionsAndroid} from 'react-native';
 import {useActionSheet} from '@expo/react-native-action-sheet';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 
-const ImageComponent = ({setImageUri}) => {
+const ImageComponent = ({setImageUri, imageUri, ADD_WAITING_RECORDING}) => {
   const {showActionSheetWithOptions} = useActionSheet();
 
   // actually useless, rn image picker handles this camera permission on its own
@@ -38,6 +38,7 @@ const ImageComponent = ({setImageUri}) => {
         console.log(res.errorCode);
       } else {
         setImageUri(res.assets[0].uri);
+        ADD_WAITING_RECORDING();
       }
     });
   };
@@ -57,6 +58,7 @@ const ImageComponent = ({setImageUri}) => {
         console.log(res.errorCode);
       } else {
         setImageUri(res.assets[0].uri);
+        ADD_WAITING_RECORDING();
       }
     });
   };
@@ -89,7 +91,12 @@ const ImageComponent = ({setImageUri}) => {
     );
   };
 
-  return <Button onPress={onPress} title={'Add a photo'} />;
+  return (
+    <Button
+      onPress={onPress}
+      title={!imageUri ? 'Add a photo' : 'Replace photo'}
+    />
+  );
 };
 
 export default ImageComponent;

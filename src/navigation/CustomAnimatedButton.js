@@ -1,4 +1,4 @@
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useContext} from 'react';
 import {
   TouchableWithoutFeedback,
   Animated,
@@ -7,6 +7,7 @@ import {
   Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import {RecordingsContext} from '@utils/recordings';
 
 const styles = StyleSheet.create({
   btnStyle: {
@@ -38,6 +39,10 @@ const styles = StyleSheet.create({
 });
 
 const CustomAnimatedButton = props => {
+  const {
+    state: {hasWaitingRec},
+  } = useContext(RecordingsContext);
+
   const {navigation} = props;
 
   const [opened, setOpened] = useState(false);
@@ -93,6 +98,7 @@ const CustomAnimatedButton = props => {
       },
     ],
   };
+
   return (
     <View style={styles.container}>
       <View>
@@ -124,9 +130,15 @@ const CustomAnimatedButton = props => {
         </TouchableWithoutFeedback>
       </View>
 
-      <TouchableWithoutFeedback onPress={() => toggleMenu()}>
+      <TouchableWithoutFeedback
+        onPress={() => navigation.jumpTo('RecordingStack')}>
         <Animated.View style={[styles.btnStyle, rotation]}>
-          <Icon name={'plus'} size={24} color={'#fff'} />
+          <Icon
+            name={!hasWaitingRec ? 'plus' : 'record-circle'}
+            size={24}
+            color={'#fff'}
+          />
+          {/* <Icon name={'plus'} size={24} color={'#fff'} /> */}
         </Animated.View>
       </TouchableWithoutFeedback>
     </View>

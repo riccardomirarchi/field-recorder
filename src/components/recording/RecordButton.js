@@ -5,6 +5,7 @@ import {
   View,
   Animated,
   TouchableWithoutFeedback,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -33,8 +34,15 @@ const styles = StyleSheet.create({
   },
 });
 
-const RecordButton = ({isRecording, animation, onPress}) => {
+const RecordButton = ({isRecording, animation, onPress, audioUri}) => {
   const outputRange = [Platform.OS === 'android' ? 0.3 : 0, 1];
+
+  const disabledAlert = () => {
+    Alert.alert(
+      'Attention',
+      'You already recorded once, if you want to record again you must either save or discard this recording.',
+    );
+  };
 
   return (
     <View>
@@ -51,12 +59,17 @@ const RecordButton = ({isRecording, animation, onPress}) => {
                 }),
               },
             ],
-            backgroundColor: `rgba(0,27,72, 0.3)`,
+            backgroundColor: 'rgba(184,0,0, 0.3)',
           },
         ]}
       />
-      <TouchableWithoutFeedback onPress={onPress}>
-        <View style={styles.circle}>
+      <TouchableWithoutFeedback
+        onPress={!audioUri ? onPress : () => disabledAlert()}>
+        <View
+          style={[
+            styles.circle,
+            isRecording ? {backgroundColor: 'rgba(184,0,0, 1)'} : {},
+          ]}>
           <Icon
             name={isRecording ? 'stop' : 'record-circle'}
             size={50}
