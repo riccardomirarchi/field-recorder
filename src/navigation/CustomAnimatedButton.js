@@ -124,15 +124,15 @@ const CustomAnimatedButton = props => {
             navigation.jumpTo('RecordingStack');
             toggleMenu();
           }}>
-          <Animated.View style={[styles.btnStyle, styles.secondaryBtn, pin]}>
+          <View style={[styles.btnStyle, styles.secondaryBtn]}>
             <Icon name={'record-circle'} size={18} color={'#fff'} />
-          </Animated.View>
+          </View>
         </TouchableWithoutFeedback>
       </View>
 
       <TouchableWithoutFeedback
         onPress={() => navigation.jumpTo('RecordingStack')}>
-        <Animated.View style={[styles.btnStyle, rotation]}>
+        <Animated.View style={[styles.btnStyle]}>
           <Icon
             name={!hasWaitingRec ? 'plus' : 'record-circle'}
             size={24}

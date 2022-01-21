@@ -105,14 +105,14 @@ const Settings = () => {
               onEndEditing={({nativeEvent: {text}}) => saveOffsetValue(text)}
               value={playbackOffset}
               style={{
-                marginHorizontal: -8,
+                marginHorizontal: 2,
               }}
               returnKeyType="go"
               textContentType="none"
               cancelButtonTitle="Cancel"
               placeholderTextColor={'#808080'}
             />
-            <Text>seconds</Text>
+            <Text>secs</Text>
           </View>
         }
       />

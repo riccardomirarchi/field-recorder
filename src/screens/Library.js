@@ -12,22 +12,44 @@ import {
   Animated,
   Platform,
   TouchableWithoutFeedback,
-  ActivityIndicator
+  ActivityIndicator,
+  StyleSheet,
+  Alert,
 } from 'react-native';
 import styles from '@styles/styles';
 import CardItem from '@components/library/CardItem';
-import { RecordingsContext } from '@utils/recordings';
+import {RecordingsContext} from '@utils/recordings';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useIsFocused } from '@react-navigation/native';
+import {useIsFocused} from '@react-navigation/native';
 import CustomShareIcon from '@navigation/CustomShareIcon';
 
-const Library = ({ navigation, route }) => {
+const style = StyleSheet.create({
+  container: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    bottom: Platform.OS == 'android' ? 110 : 120,
+    left: 20,
+    width: 55,
+    height: 55,
+    borderRadius: 55 / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowRadius: 10,
+    shadowColor: '#001B48',
+    shadowOpacity: 0.25,
+    elevation: 10,
+    zIndex: 5,
+  },
+});
+
+const Library = ({navigation, route}) => {
   const focused = useIsFocused();
   const animation = useRef(new Animated.Value(0)).current;
 
   const [selectionOpened, setOpened] = useState(false);
   const [selectedIndexes, setIndexes] = useState([]);
-  const [isProcessingExport, setIsProcessingExport] = useState(false)
+  const [isProcessingExport, setIsProcessingExport] = useState(false);
 
   const marginRight = animation.interpolate({
     inputRange: [0, 1],
@@ -83,7 +105,7 @@ const Library = ({ navigation, route }) => {
           headerRight: () => (
             <TouchableWithoutFeedback
               onPress={async () => {
-                await EXPORT_RECORDINGS(getRecordingToShare(), setIsProcessingExport);
+                await EXPORT_RECORDINGS(getRecordings(), setIsProcessingExport);
               }}>
               <Animated.View
                 style={{
@@ -92,7 +114,7 @@ const Library = ({ navigation, route }) => {
                   flexDirection: 'row',
                   alignItems: 'center',
                 }}>
-                {!isProcessingExport ?
+                {!isProcessingExport ? (
                   <>
                     <Text
                       style={{
@@ -106,7 +128,9 @@ const Library = ({ navigation, route }) => {
                     </Text>
                     <Icon name={'export'} size={27} color={'#fff'} />
                   </>
-                  : <ActivityIndicator size="large" color={'#fff'} />}
+                ) : (
+                  <ActivityIndicator size="large" color={'#fff'} />
+                )}
               </Animated.View>
             </TouchableWithoutFeedback>
           ),
@@ -116,7 +140,7 @@ const Library = ({ navigation, route }) => {
             return (
               <TouchableWithoutFeedback onPress={closeSelection}>
                 <Animated.View
-                  style={{ left: 22, bottom: 22, opacity: animation }}>
+                  style={{left: 22, bottom: 22, opacity: animation}}>
                   <Text
                     style={{
                       fontSize: 18,
@@ -130,7 +154,13 @@ const Library = ({ navigation, route }) => {
             );
           },
           headerRight: () => (
-            <Animated.View style={{ top: 12, opacity: animation, flexDirection: 'row', alignItems: 'center', }}>
+            <Animated.View
+              style={{
+                top: 12,
+                opacity: animation,
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}>
               <Text
                 style={{
                   fontSize: 16,
@@ -139,13 +169,16 @@ const Library = ({ navigation, route }) => {
                   marginRight: 5,
                   position: 'absolute',
                   right: 50,
-                  bottom: 23
+                  bottom: 23,
                 }}>
                 {selectedIndexes.length}
               </Text>
               <CustomShareIcon
                 onPress={async () => {
-                  await EXPORT_RECORDINGS(getRecordingToShare(), setIsProcessingExport);
+                  await EXPORT_RECORDINGS(
+                    getRecordings(),
+                    setIsProcessingExport,
+                  );
                 }}
               />
             </Animated.View>
@@ -155,7 +188,7 @@ const Library = ({ navigation, route }) => {
     });
   }, [selectedIndexes, isProcessingExport]);
 
-  const getRecordingToShare = () => {
+  const getRecordings = () => {
     return selectedIndexes.map(index => recordings[index]);
   };
 
@@ -170,11 +203,11 @@ const Library = ({ navigation, route }) => {
   }, [route.params?.recording]);
 
   const {
-    state: { recordings },
-    utils: { EXPORT_RECORDINGS },
+    state: {recordings},
+    utils: {EXPORT_RECORDINGS, DELETE_RECORDINGS},
   } = useContext(RecordingsContext);
 
-  const _renderItem = ({ item, index }) => {
+  const _renderItem = ({item, index}) => {
     return (
       <CardItem
         item={item}
@@ -188,22 +221,66 @@ const Library = ({ navigation, route }) => {
     );
   };
 
+  const showWarningDeleteAlert = () => {
+    Alert.alert(
+      'Attention',
+      `Are you sure you want to delete ${selectedIndexes.length} recording${
+        selectedIndexes.length > 1 ? 's' : ''
+      }?`,
+      [
+        {
+          text: 'Proceed',
+          style: 'destructive',
+          onPress: () =>
+            DELETE_RECORDINGS(getRecordings(), true)
+              .then(() => setIndexes([]))
+              .catch(() =>
+                Alert.alert('OPS', 'An error occured, try again later.'),
+              ),
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+      ],
+    );
+  };
+
   return (
-    <FlatList
-      data={recordings}
-      renderItem={_renderItem}
-      keyExtractor={item => item.initialRecordingTimestamp}
-      contentContainerStyle={styles.container}
-      ListEmptyComponent={() => {
-        return (
-          <View style={{ alignItems: 'center', flex: 1, paddingTop: 30 }}>
-            <Text style={{ color: '#4f4f4f' }}>
-              You don't have any recording yet.
-            </Text>
-          </View>
-        );
-      }}
-    />
+    <>
+      <TouchableWithoutFeedback
+        onPress={() => showWarningDeleteAlert()}
+        disabled={!selectedIndexes.length}>
+        <Animated.View
+          style={[
+            style.container,
+            {
+              opacity: animation,
+              backgroundColor: !selectedIndexes.length
+                ? 'rgba(184,0,0, 0.6)'
+                : 'rgba(184,0,0, 1)',
+              transform: [{scale: animation}],
+            },
+          ]}>
+          <Icon name={'delete'} size={24} color={'#fff'} />
+        </Animated.View>
+      </TouchableWithoutFeedback>
+      <FlatList
+        data={recordings}
+        renderItem={_renderItem}
+        keyExtractor={item => item.initialRecordingTimestamp}
+        contentContainerStyle={styles.container}
+        ListEmptyComponent={() => {
+          return (
+            <View style={{alignItems: 'center', flex: 1, paddingTop: 30}}>
+              <Text style={{color: '#4f4f4f'}}>
+                You don't have any recording yet.
+              </Text>
+            </View>
+          );
+        }}
+      />
+    </>
   );
 };
 

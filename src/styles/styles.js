@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
     top: StatusBar.currentHeight - 15,
     backgroundColor: '#808080',
     borderRadius: 25,
-    width: Dimensions.get('screen').width - 40,
+    width: SCREEN_SIZE.width - 40,
     alignSelf: 'center',
   },
 

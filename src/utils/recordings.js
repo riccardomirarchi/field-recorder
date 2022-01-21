@@ -19,7 +19,7 @@ export const recordingsReducer = (
         hasWaitingRec,
       };
 
-    case 'DELETE_RECORDING':
+    case 'DELETE_RECORDINGS':
       return {
         loading: false,
         recordings: payload,
@@ -67,6 +67,7 @@ export const pathToZippedFolder = FileSystem.documentDirectory + 'Zipped/';
 // get settings in storage
 export const getRecordingQuality = async () =>
   JSON.parse(await AsyncStorage.getItem('recordingQuality'));
+
 export const getSaveRecordings = async () =>
   JSON.parse(await AsyncStorage.getItem('saveRecordings'));
 
@@ -217,28 +218,33 @@ export const recordingsMemo = (dispatch, recordings) => ({
       }
     });
   },
-  DELETE_RECORDING: (recordingToBeDeleted, forceDelete) => {
+  DELETE_RECORDINGS: (recordingsToBeDeleted, forceDelete) => {
     // this function takes an identifier and remove the recording with that id
     // both from the state and in the file system
 
     return new Promise(async (resolve, reject) => {
-      const payload = recordings.filter(item => item !== recordingToBeDeleted);
-      try {
-        if (recordingToBeDeleted.audioUri)
-          await FileSystem.deleteAsync(
-            pathToRecordingsFolder + recordingToBeDeleted.audioUri,
-            {
-              idempotent: forceDelete,
-            },
-          );
+      const payload = recordings.filter(
+        item => !recordingsToBeDeleted.includes(item),
+      );
 
-        if (recordingToBeDeleted.imageUri)
-          await FileSystem.deleteAsync(
-            pathToImagesFolder + recordingToBeDeleted.imageUri,
-            {
-              idempotent: forceDelete,
-            },
-          );
+      try {
+        for (const recording in recordingsToBeDeleted) {
+          if (recording.audioUri)
+            await FileSystem.deleteAsync(
+              pathToRecordingsFolder + recording.audioUri,
+              {
+                idempotent: forceDelete,
+              },
+            );
+
+          if (recording.imageUri)
+            await FileSystem.deleteAsync(
+              pathToImagesFolder + recording.imageUri,
+              {
+                idempotent: forceDelete,
+              },
+            );
+        }
 
         resolve();
       } catch (e) {
@@ -252,7 +258,7 @@ export const recordingsMemo = (dispatch, recordings) => ({
         );
 
         dispatch({
-          type: 'DELETE_RECORDING',
+          type: 'DELETE_RECORDINGS',
           payload,
         });
       }

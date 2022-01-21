@@ -7,7 +7,7 @@ const DeleteButton = ({recording}) => {
   const navigation = useNavigation();
 
   const {
-    utils: {DELETE_RECORDING},
+    utils: {DELETE_RECORDINGS},
   } = useContext(RecordingsContext);
 
   const onSuccess = () => {
@@ -39,7 +39,7 @@ const DeleteButton = ({recording}) => {
   };
 
   const performDelete = forceDelete => {
-    DELETE_RECORDING(recording, forceDelete).then(onSuccess).catch(onError);
+    DELETE_RECORDINGS([recording], forceDelete).then(onSuccess).catch(onError);
   };
 
   const deleteRecording = forceDelete => {

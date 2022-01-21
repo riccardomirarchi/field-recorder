@@ -42,7 +42,6 @@ const Recording = ({navigation}) => {
   }, [recording, imageUri]);
 
   useLayoutEffect(() => {
-    console.log('goes', imageUri);
     navigation.setOptions({
       ...Platform.select({
         android: {
