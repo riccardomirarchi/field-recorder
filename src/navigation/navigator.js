@@ -1,26 +1,19 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import {NavigationContainer} from '@react-navigation/native';
 
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 
-import { createStackNavigator } from '@react-navigation/stack';
-import { labelOptions, screenOptions } from '@navigation/utils';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Platform,
-  TouchableWithoutFeedback,
-  StatusBar,
-} from 'react-native';
+import {createStackNavigator} from '@react-navigation/stack';
+import {labelOptions, screenOptions} from '@navigation/utils';
+import {Platform, TouchableWithoutFeedback, StatusBar} from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign';
-import { ActionSheetProvider } from '@expo/react-native-action-sheet';
+import {ActionSheetProvider} from '@expo/react-native-action-sheet';
 
 // screens
 import Library from '@screens/Library';
 import Recording from '@screens/Recording';
 import RecordingDetails from '@screens/RecordingDetails';
-import Settings from '@screens/Settings'
+import Settings from '@screens/Settings';
 
 // custom tab bar
 import CustomTabBarAndroid from '@navigation/CustomTabBarAndroid';
@@ -72,7 +65,7 @@ const options = navigation => ({
   },
   headerTitleContainerStyle: {
     ...Platform.select({
-      ios: { marginTop: -42 },
+      ios: {marginTop: -42},
     }),
   },
   headerTitleStyle: {
@@ -81,10 +74,10 @@ const options = navigation => ({
   },
 });
 
-function libraryStack() {
+function LibraryS() {
   return (
     <LibraryStack.Navigator
-      screenOptions={({ navigation }) => options(navigation)}>
+      screenOptions={({navigation}) => options(navigation)}>
       <LibraryStack.Screen name={'Library'} component={Library} />
       <LibraryStack.Screen
         name={'Recording Details'}
@@ -94,19 +87,19 @@ function libraryStack() {
   );
 }
 
-function recordingStack() {
+function RecordingS() {
   return (
     <RecordingStack.Navigator
-      screenOptions={({ navigation }) => options(navigation)}>
+      screenOptions={({navigation}) => options(navigation)}>
       <RecordingStack.Screen name={'New Recording'} component={Recording} />
     </RecordingStack.Navigator>
   );
 }
 
-function settingsStack() {
+function SettingsS() {
   return (
     <SettingsStack.Navigator
-      screenOptions={({ navigation }) => options(navigation)}>
+      screenOptions={({navigation}) => options(navigation)}>
       <SettingsStack.Screen name={'Settings'} component={Settings} />
     </SettingsStack.Navigator>
   );
@@ -122,7 +115,7 @@ function MainBottomNavigator() {
     <MainBottomTabs.Navigator
       initialRouteName={'LibraryStack'}
       tabBar={props => tabToRender(props)}
-      screenOptions={({ route }) => ({
+      screenOptions={({route}) => ({
         headerShown: false,
         tabBarStyle: {
           borderTopColor: 'transparent',
@@ -131,17 +124,17 @@ function MainBottomNavigator() {
         },
         tabBarActiveTintColor: 'white',
         tabBarInactiveTintColor: '#d9d9d9',
-        tabBarIcon: ({ focused, color }) => screenOptions(route, color, focused),
-        tabBarLabel: ({ focused, color }) => labelOptions(route, color, focused),
+        tabBarIcon: ({focused, color}) => screenOptions(route, color, focused),
+        tabBarLabel: ({focused, color}) => labelOptions(route, color, focused),
         // tabBarHideOnKeyboard: true
       })}>
-      <MainBottomTabs.Screen name={'LibraryStack'} component={libraryStack} />
+      <MainBottomTabs.Screen name={'LibraryStack'} component={LibraryS} />
       <MainBottomTabs.Screen
         name={'RecordingStack'}
-        options={{ tabBarButton: () => null }}
-        component={recordingStack}
+        options={{tabBarButton: () => null}}
+        component={RecordingS}
       />
-      <MainBottomTabs.Screen name={'SettingsStack'} component={settingsStack} />
+      <MainBottomTabs.Screen name={'SettingsStack'} component={SettingsS} />
     </MainBottomTabs.Navigator>
   );
 }
