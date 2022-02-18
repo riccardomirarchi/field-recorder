@@ -38,10 +38,29 @@ const Recording = ({navigation}) => {
   const focused = useIsFocused();
 
   useEffect(() => {
-    console.log(recording, 'rec');
-  }, [recording, imageUri]);
+    CompassHeading.start(3, ({heading}) => {
+      setCompassHeading(heading);
+      console.log(heading);
+    });
+
+    return () => {
+      CompassHeading.stop();
+    };
+  }, []);
+
+  useEffect(() => {
+    Geolocation.watchPosition(position => {
+      const {accuracy, latitude, longitude} = position.coords;
+      setCoords({accuracy, latitude, longitude});
+    });
+
+    return () => {
+      Geolocation.clearWatch();
+    };
+  });
 
   useLayoutEffect(() => {
+    console.log(recording, 'rec');
     navigation.setOptions({
       ...Platform.select({
         android: {
@@ -171,6 +190,10 @@ const Recording = ({navigation}) => {
       .catch(e => console.log('error while saving new record', e));
   };
 
+  // for the listeners
+  const [compassHeading, setCompassHeading] = useState(null);
+  const [coords, setCoords] = useState(null);
+
   const [recording, setRecording] = useState();
   const [canSaveRecording, setCanSaveRecording] = useState(true);
   const [initialRecordingTimestamp, setInitialRecordingTimestamp] = useState();
@@ -206,16 +229,18 @@ const Recording = ({navigation}) => {
       const permissionStatus = await requestPermissions();
 
       if (permissionStatus === 'granted') {
-        Geolocation.getCurrentPosition(
-          position => {
-            const {accuracy, latitude, longitude} = position.coords;
-            setGeolocation({accuracy, latitude, longitude});
-          },
-          error => {
-            console.log(error.code, error.message);
-          },
-          {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
-        );
+        setGeolocation(coords);
+        
+        // Geolocation.getCurrentPosition(
+        //   position => {
+        //     const {accuracy, latitude, longitude} = position.coords;
+        //     setGeolocation({accuracy, latitude, longitude});
+        //   },
+        //   error => {
+        //     console.log(error.code, error.message);
+        //   },
+        //   {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+        // );
       } else {
         console.log('geolocation permissions not granted :(');
       }
@@ -224,10 +249,7 @@ const Recording = ({navigation}) => {
     }
 
     // compass heading infos
-    CompassHeading.start(0, ({heading}) => {
-      setOrientation(heading);
-      CompassHeading.stop();
-    });
+    setOrientation(compassHeading);
 
     // audio
     try {

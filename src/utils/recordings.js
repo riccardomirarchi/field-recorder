@@ -74,6 +74,23 @@ export const getSaveRecordings = async () =>
 export const getPlaybackOffset = async () =>
   JSON.parse(await AsyncStorage.getItem('playbackOffset'));
 
+const doesZipExist = async recording => {
+  // we must remove the : from the path, since stupid android file system crashes...
+  const folderPath =
+    pathToZippedFolder +
+    `${recording.initialRecordingTimestamp.split(':').join('_')}`;
+
+  const zip = await FileSystem.getInfoAsync(`${folderPath}.zip`);
+
+  if (zip.exists) {
+    console.log(`zipped file alreay exists at path ${folderPath}.zip`);
+
+    return {zipUrl: `${folderPath}.zip`, folderPath};
+  } else {
+    return {zipUrl: null, folderPath};
+  }
+};
+
 export const recordingsMemo = (dispatch, recordings) => ({
   RETRIEVE_RECORDINGS: async () => {
     // this function is called at the opening of the app
@@ -275,21 +292,12 @@ export const recordingsMemo = (dispatch, recordings) => ({
     const getZippedUrl = async recording => {
       let tmpRecording = {...recording};
 
-      // we must remove the : from the path, since stupid android file system crashes...
-      const folderPath =
-        pathToZippedFolder +
-        `${tmpRecording.initialRecordingTimestamp.split(':').join('_')}`;
-
       // we check if the zipped file already exists in the file system
       // if not we create a new one, otherwise we skip and share
-      const zip = await FileSystem.getInfoAsync(`${folderPath}.zip`);
+      const {zipUrl, folderPath} = await doesZipExist(tmpRecording);
 
-      if (zip.exists) {
-        console.log(
-          `zipped file alreay exists at path ${folderPath}.zip, sharing directly..`,
-        );
-
-        return `${folderPath}.zip`;
+      if (zipUrl) {
+        return zipUrl;
       }
 
       try {
@@ -341,7 +349,7 @@ export const recordingsMemo = (dispatch, recordings) => ({
     };
 
     // this function return an array of url, each one of them pointing to the path of the zipped file in the fs
-    const getUrls = async () => {
+    const getUrls = () => {
       return Promise.all(
         recordings.map(async recording => await getZippedUrl(recording)),
       );
@@ -363,6 +371,17 @@ export const recordingsMemo = (dispatch, recordings) => ({
     // this is an 'in place' change, so the state will be updated automatically, no need to dispatch
     // an action and update the state manually, we only need to update the recordings in the fs
     recordingToBeRenamed.recordingName = newRecordingName;
+
+    // if we change the name of a recording already exported, we cannot keep trace of the new recording
+    // name if we want to export that file again, so we check if there is a zipped file of the file and
+    // in that case we delete it
+    const {zipUrl} = await doesZipExist(recordingToBeRenamed);
+
+    if (zipUrl) {
+      await FileSystem.deleteAsync(zipUrl, {
+        idempotent: true,
+      });
+    }
 
     await FileSystem.writeAsStringAsync(
       pathToJSON,
@@ -426,12 +445,12 @@ const androidRecordingPresetHighQuality = {
   bitRate: 320000,
 };
 
-export const LOW_QUALITY_PRESETS = {
+const LOW_QUALITY_PRESETS = {
   android: androidRecordingPreset,
   ios: iosRecordingPreset,
 };
 
-export const HIGH_QUALITY_PRESETS = {
+const HIGH_QUALITY_PRESETS = {
   android: androidRecordingPresetHighQuality,
   ios: iosRecordingPresetHighQuality,
 };
