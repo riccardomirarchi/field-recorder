@@ -1,13 +1,13 @@
 import React from 'react';
-import {View, Text} from 'react-native';
+import {View, Text, Animated} from 'react-native';
 import styles from '@styles/styles';
 
-const CardItem = ({text, rightElement}) => {
+const CardItem = ({text, rightElement, style = {}}) => {
   return (
-    <View style={styles.cardItemContainer}>
+    <Animated.View style={[styles.cardItemContainer, style]}>
       <Text style={styles.cardItemTextStyle}>{text}</Text>
       {rightElement}
-    </View>
+    </Animated.View>
   );
 };
 export default CardItem;

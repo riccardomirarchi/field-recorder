@@ -14,7 +14,7 @@ const CustomReloadIcon = ({ onPress }) => {
         flex: 1,
       }}
       onPress={onPress}>
-      <Icon name={'reload1'} size={24} color={'#fff'} />
+      <Icon name={'delete'} size={24} color={'#fff'} />
     </TouchableOpacity>
   );
 };

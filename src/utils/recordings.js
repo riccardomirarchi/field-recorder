@@ -74,6 +74,9 @@ export const getSaveRecordings = async () =>
 export const getPlaybackOffset = async () =>
   JSON.parse(await AsyncStorage.getItem('playbackOffset'));
 
+export const getStereoMode = async () =>
+  JSON.parse(await AsyncStorage.getItem('stereoMode'));
+
 const doesZipExist = async recording => {
   // we must remove the : from the path, since stupid android file system crashes...
   const folderPath =
@@ -135,6 +138,7 @@ export const recordingsMemo = (dispatch, recordings) => ({
       const recordingQuality = await getRecordingQuality();
       const saveRecordings = await getSaveRecordings();
       const playbackOffset = await getPlaybackOffset();
+      const stereoMode = await getStereoMode();
 
       if (recordingQuality === null || recordingQuality === undefined)
         await AsyncStorage.setItem('recordingQuality', JSON.stringify(true));
@@ -144,6 +148,9 @@ export const recordingsMemo = (dispatch, recordings) => ({
 
       if (playbackOffset === null || playbackOffset === undefined)
         await AsyncStorage.setItem('playbackOffset', JSON.stringify(0));
+
+      if (stereoMode === null || stereoMode === undefined)
+        await AsyncStorage.setItem('stereoMode', JSON.stringify(true));
 
       // here we take a look at the zipped file we have in the file system, if they have been created
       // since more than a month we delete them for getting more free space on the device.
@@ -229,6 +236,7 @@ export const recordingsMemo = (dispatch, recordings) => ({
           payload,
         });
 
+        console.log('added new recording with infos: ', payload);
         resolve();
       } catch (e) {
         reject(e);
@@ -389,10 +397,10 @@ export const recordingsMemo = (dispatch, recordings) => ({
       options,
     );
   },
-  ADD_WAITING_RECORDING: () => {
+  ADD_WAITING_RECORDING: recordingName => {
     dispatch({
       type: 'ADD_WAITING_RECORDING',
-      payload: {hasWaitingRec: true},
+      payload: {hasWaitingRec: recordingName},
     });
   },
   REMOVE_WAITING_RECORDING: () => {

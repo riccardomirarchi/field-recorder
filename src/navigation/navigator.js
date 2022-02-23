@@ -1,11 +1,17 @@
-import React from 'react';
+import React, {useContext, useState, useEffect} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 
 import {createStackNavigator} from '@react-navigation/stack';
 import {labelOptions, screenOptions} from '@navigation/utils';
-import {Platform, TouchableWithoutFeedback, StatusBar} from 'react-native';
+import {
+  Platform,
+  TouchableWithoutFeedback,
+  StatusBar,
+  Alert,
+  TextInput,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign';
 import {ActionSheetProvider} from '@expo/react-native-action-sheet';
 
@@ -22,6 +28,9 @@ import CustomHeader from '@navigation/CustomHeader';
 import CustomHeaderAndroid from '@navigation/CustomHeaderAndroid';
 
 import CustomBackIcon from '@navigation/CustomBackIcon';
+import CustomReloadIcon from '@navigation/CustomReloadIcon';
+
+import {RecordingsContext} from '@utils/recordings';
 
 // stack navigators
 const SettingsStack = createStackNavigator();
@@ -30,7 +39,8 @@ const RecordingStack = createStackNavigator();
 
 const MainBottomTabs = createBottomTabNavigator();
 
-const options = navigation => ({
+const options = (navigation, additionalOptions = {}) => ({
+  ...additionalOptions,
   ...Platform.select({
     ios: {
       headerLeft: props => (
@@ -88,9 +98,71 @@ function LibraryS() {
 }
 
 function RecordingS() {
+  const {
+    utils: {REMOVE_WAITING_RECORDING, ADD_WAITING_RECORDING},
+    state: {hasWaitingRec},
+  } = useContext(RecordingsContext);
+
+  useEffect(() => {
+    if (!hasWaitingRec) setTitle('New Recording');
+  }, [hasWaitingRec]);
+
+  const [title, setTitle] = useState();
+
+  const showAlertToReset = () => {
+    Alert.alert('Attention', 'You really want to discard the recording?', [
+      {
+        text: 'Proceed',
+        onPress: () => REMOVE_WAITING_RECORDING(),
+        style: 'destructive',
+      },
+      {text: 'Cancel'},
+    ]);
+  };
+
   return (
     <RecordingStack.Navigator
-      screenOptions={({navigation}) => options(navigation)}>
+      screenOptions={({navigation}) =>
+        options(navigation, {
+          ...Platform.select({
+            android: {
+              headerRight: () => (
+                <TouchableWithoutFeedback onPress={() => showAlertToReset()}>
+                  <View style={{marginRight: 20}}>
+                    <Icon name={'delete'} size={24} color={'#fff'} />
+                  </View>
+                </TouchableWithoutFeedback>
+              ),
+            },
+            ios: {
+              headerRight: () =>
+                hasWaitingRec && (
+                  <CustomReloadIcon onPress={() => showAlertToReset()} />
+                ),
+            },
+          }),
+          headerTitle: () => (
+            <TextInput
+              value={title}
+              onChangeText={val => setTitle(val)}
+              style={{
+                fontSize: 22,
+                color: '#FFF',
+                fontWeight: '600',
+                width: Platform.OS == 'android' ? 250 : null,
+              }}
+              placeholder="Recording..."
+              placeholderTextColor={'rgba(255, 255, 255, 0.5)'}
+              returnKeyType="go"
+              textContentType="none"
+              cancelButtonTitle="Cancel"
+              onEndEditing={({nativeEvent: {text}}) =>
+                ADD_WAITING_RECORDING(text)
+              }
+            />
+          ),
+        })
+      }>
       <RecordingStack.Screen name={'New Recording'} component={Recording} />
     </RecordingStack.Navigator>
   );

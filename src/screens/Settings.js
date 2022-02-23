@@ -1,5 +1,5 @@
-import React, {useState, useEffect} from 'react';
-import {View, Switch, TextInput, Text, Alert} from 'react-native';
+import React, {useState, useEffect, useRef} from 'react';
+import {View, Switch, TextInput, Text, Alert, Animated} from 'react-native';
 import styles from '@styles/styles';
 import CardItem from '../settings/CardItem';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -17,6 +17,7 @@ const Settings = () => {
         setPlaybackOffset(
           JSON.parse(await AsyncStorage.getItem('playbackOffset')).toString(),
         );
+        setStereoMode(JSON.parse(await AsyncStorage.getItem('stereoMode')));
       } catch (e) {
         console.log(e);
       }
@@ -63,21 +64,60 @@ const Settings = () => {
     }
   };
 
+  const toggleMode = async () => {
+    setStereoMode(!stereoMode);
+    await AsyncStorage.setItem('stereoMode', JSON.stringify(!stereoMode));
+  };
+
+  const opacity = useRef(new Animated.Value(1)).current;
+
   const [highQualityEnabled, setHighQuality] = useState(false);
   const [saveRecordingsEnabled, setSaveRecordings] = useState(false);
   const [playbackOffset, setPlaybackOffset] = useState('0');
+  const [stereoMode, setStereoMode] = useState(false);
+
+  useEffect(() => {
+    if (!saveRecordingsEnabled && opacity) {
+      console.log('ciao');
+      Animated.timing(opacity, {
+        toValue: 0.5,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [saveRecordingsEnabled]);
 
   return (
     <View style={styles.container}>
+      <CardItem
+        text={'Stereo'}
+        rightElement={
+          <Switch
+            ios_backgroundColor="#808080"
+            onValueChange={toggleMode}
+            value={saveRecordingsEnabled ? stereoMode : false}
+            disabled={saveRecordingsEnabled === false}
+          />
+        }
+        style={{opacity}}
+      />
       <CardItem
         text={'High Quality Recording'}
         rightElement={
           <Switch
             ios_backgroundColor="#808080"
             onValueChange={toggleQuality}
-            value={highQualityEnabled}
+            value={saveRecordingsEnabled ? highQualityEnabled : false}
+            disabled={saveRecordingsEnabled === false}
           />
         }
+        style={{opacity}}
       />
       <CardItem
         text={'Save Recordings'}

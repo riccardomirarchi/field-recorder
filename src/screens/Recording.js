@@ -1,10 +1,4 @@
-import React, {
-  useRef,
-  useState,
-  useContext,
-  useEffect,
-  useLayoutEffect,
-} from 'react';
+import React, {useRef, useState, useContext, useEffect} from 'react';
 import {
   Platform,
   View,
@@ -18,7 +12,6 @@ import RecordButton from '@components/recording/RecordButton';
 import ImageComponent from '@components/recording/ImageComponent';
 import Geolocation from 'react-native-geolocation-service';
 import CompassHeading from 'react-native-compass-heading';
-import Icon from 'react-native-vector-icons/AntDesign';
 import Ionicon from 'react-native-vector-icons/Ionicons';
 import {Audio} from 'expo-av';
 import {
@@ -27,7 +20,6 @@ import {
   formatMillis,
 } from '@utils/recordings';
 import flatlistContainerStyle from '@styles/styles';
-import CustomReloadIcon from '@navigation/CustomReloadIcon';
 import EventCardItem from '@components/recording/EventCardItem';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useIsFocused} from '@react-navigation/native';
@@ -37,10 +29,21 @@ import {requestPermissions} from '@utils/permissions';
 const Recording = ({navigation}) => {
   const focused = useIsFocused();
 
+  const {
+    utils: {ADD_NEW_RECORDING, ADD_WAITING_RECORDING, REMOVE_WAITING_RECORDING},
+    state: {recordings, hasWaitingRec},
+  } = useContext(RecordingsContext);
+
+  // reset the state when recording is deleted before saving
+  useEffect(() => {
+    if (!hasWaitingRec && audioUri !== undefined) resetState();
+  }, [hasWaitingRec]);
+
+  // compass heading observer
   useEffect(() => {
     CompassHeading.start(3, ({heading}) => {
+      console.log(heading, 'watching compass heading changes...');
       setCompassHeading(heading);
-      console.log(heading);
     });
 
     return () => {
@@ -48,40 +51,36 @@ const Recording = ({navigation}) => {
     };
   }, []);
 
+  // geolocation observer
   useEffect(() => {
-    Geolocation.watchPosition(position => {
-      const {accuracy, latitude, longitude} = position.coords;
-      setCoords({accuracy, latitude, longitude});
-    });
+    const startLocationObserver = async () => {
+      try {
+        const permissionStatus = await requestPermissions();
 
-    return () => {
-      Geolocation.clearWatch();
+        if (permissionStatus === 'granted') {
+          Geolocation.watchPosition(position => {
+            const {accuracy, latitude, longitude} = position.coords;
+            console.log(
+              {accuracy, latitude, longitude},
+              'watching position changes...',
+            );
+            setCoords({accuracy, latitude, longitude});
+          });
+
+          return () => {
+            Geolocation.clearWatch();
+          };
+        } else {
+          setCoords(null);
+          console.log('geolocation permissions not granted :(');
+        }
+      } catch (e) {
+        console.log(e, 'error while asking location usage permission');
+      }
     };
-  });
 
-  useLayoutEffect(() => {
-    console.log(recording, 'rec');
-    navigation.setOptions({
-      ...Platform.select({
-        android: {
-          headerRight: () => (
-            // (imageUri || audioUri) && (
-            <TouchableWithoutFeedback onPress={() => showAlertToReset()}>
-              <View style={{marginRight: 20}}>
-                <Icon name={'delete'} size={24} color={'#fff'} />
-              </View>
-            </TouchableWithoutFeedback>
-          ),
-          // ),
-        },
-        ios: {
-          headerRight: () => (
-            <CustomReloadIcon onPress={() => showAlertToReset()} />
-          ),
-        },
-      }),
-    });
-  }, [imageUri, audioUri]);
+    startLocationObserver();
+  });
 
   useEffect(() => {
     const canSaveRec = async () => {
@@ -139,19 +138,8 @@ const Recording = ({navigation}) => {
     );
   };
 
-  const showAlertToReset = () => {
-    Alert.alert('Attention', 'You really want to discard the recording?', [
-      {text: 'Proceed', onPress: () => resetState(), style: 'destructive'},
-      {text: 'Cancel'},
-    ]);
-  };
-
-  const {
-    utils: {ADD_NEW_RECORDING, ADD_WAITING_RECORDING, REMOVE_WAITING_RECORDING},
-    state: {recordings},
-  } = useContext(RecordingsContext);
-
   const resetState = () => {
+    console.log('resetting recording state...');
     setRecording(undefined);
     setInitialRecordingTimestamp();
     setAudioUri();
@@ -162,9 +150,6 @@ const Recording = ({navigation}) => {
     setIsRecording(false);
     setPosition(0);
     setDuration(0);
-
-    // set to false the waiting rec in the state (needed to update tabs icon)
-    REMOVE_WAITING_RECORDING();
   };
 
   const saveRecording = newRecording => {
@@ -173,12 +158,12 @@ const Recording = ({navigation}) => {
         Alert.alert('Success', 'You successfully saved a new recording!', [
           {
             text: 'Ok',
-            onPress: () => resetState(),
+            onPress: () => REMOVE_WAITING_RECORDING(),
           },
           {
             text: 'View',
             onPress: () => {
-              resetState();
+              REMOVE_WAITING_RECORDING();
               navigation.jumpTo('LibraryStack', {
                 screen: 'Library',
                 params: {recording: newRecording},
@@ -223,30 +208,8 @@ const Recording = ({navigation}) => {
   // to do: request at install
   const startRecording = async () => {
     // geolocation infos
-    try {
-      console.log('Requesting permissions...');
 
-      const permissionStatus = await requestPermissions();
-
-      if (permissionStatus === 'granted') {
-        setGeolocation(coords);
-        
-        // Geolocation.getCurrentPosition(
-        //   position => {
-        //     const {accuracy, latitude, longitude} = position.coords;
-        //     setGeolocation({accuracy, latitude, longitude});
-        //   },
-        //   error => {
-        //     console.log(error.code, error.message);
-        //   },
-        //   {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
-        // );
-      } else {
-        console.log('geolocation permissions not granted :(');
-      }
-    } catch (e) {
-      console.log(e, 'error while asking location usage permission');
-    }
+    setGeolocation(coords);
 
     // compass heading infos
     setOrientation(compassHeading);
@@ -295,7 +258,9 @@ const Recording = ({navigation}) => {
     setAudioUri(uri);
     console.log('Recording stopped and stored tmp at', uri);
     animateIcon(-159);
-    ADD_WAITING_RECORDING();
+
+    if (!hasWaitingRec)
+      ADD_WAITING_RECORDING(`Recording ${recordings.length + 1}`);
   };
 
   const markEvent = async () => {
@@ -308,35 +273,15 @@ const Recording = ({navigation}) => {
     }
 
     try {
-      const status = await recording.getStatusAsync();
-
-      let position = null;
-
-      let compassHeading = null;
-
-      // Geolocation.getCurrentPosition(
-      //   position => {
-      //     const {accuracy, latitude, longitude} = position.coords;
-      //     position = {accuracy, latitude, longitude};
-      //   },
-      //   error => {
-      //     console.log(error.code, error.message);
-      //   },
-      //   {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
-      // );
-
-      // CompassHeading.start(0, ({heading}) => {
-      //   console.log(heading);
-      //   CompassHeading.stop();
-      // });
+      const {durationMillis} = await recording.getStatusAsync();
 
       setMarkedEvents(events => [
         ...events,
         {
           title: `Event n°${events.length + 1}`,
           description: null,
-          millisFromBeginning: status.durationMillis,
-          position,
+          millisFromBeginning: durationMillis,
+          position: coords,
           compassHeading,
         },
       ]);
@@ -402,7 +347,7 @@ const Recording = ({navigation}) => {
             disabled={!audioUri}
             onPress={() => {
               saveRecording({
-                recordingName: `Recording ${recordings.length + 1}`,
+                recordingName: hasWaitingRec,
                 markedEvents,
                 duration,
                 initialRecordingTimestamp,
