@@ -11,9 +11,13 @@ import {
   StatusBar,
   Alert,
   TextInput,
+  ActivityIndicator,
+  View,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign';
+import {Icon as MaterialIcon} from 'react-native-vector-icons/MaterialCommunityIcons';
 import {ActionSheetProvider} from '@expo/react-native-action-sheet';
+import CustomShareIcon from '../navigation/CustomShareIcon';
 
 // screens
 import Library from '@screens/Library';
@@ -85,6 +89,12 @@ const options = (navigation, additionalOptions = {}) => ({
 });
 
 function LibraryS() {
+  const [isProcessingExport, setIsProcessingExport] = useState(false);
+
+  const {
+    utils: {EXPORT_RECORDINGS},
+  } = useContext(RecordingsContext);
+
   return (
     <LibraryStack.Navigator
       screenOptions={({navigation}) => options(navigation)}>
@@ -92,6 +102,39 @@ function LibraryS() {
       <LibraryStack.Screen
         name={'Recording Details'}
         component={RecordingDetails}
+        options={({
+          route: {
+            params: {recording},
+          },
+        }) => ({
+          ...Platform.select({
+            android: {
+              headerRight: () => (
+                <TouchableWithoutFeedback
+                  onPress={async () => {
+                    await EXPORT_RECORDINGS([recording], setIsProcessingExport);
+                  }}>
+                  <View style={{marginRight: 20}}>
+                    {!isProcessingExport ? (
+                      <MaterialIcon name={'export'} size={27} color={'#fff'} />
+                    ) : (
+                      <ActivityIndicator size="large" color={'#fff'} />
+                    )}
+                  </View>
+                </TouchableWithoutFeedback>
+              ),
+            },
+            ios: {
+              headerRight: () => (
+                <CustomShareIcon
+                  onPress={async () => {
+                    await EXPORT_RECORDINGS([recording], setIsProcessingExport);
+                  }}
+                />
+              ),
+            },
+          }),
+        })}
       />
     </LibraryStack.Navigator>
   );

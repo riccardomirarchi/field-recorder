@@ -31,7 +31,7 @@ const Recording = ({navigation}) => {
 
   const {
     utils: {ADD_NEW_RECORDING, ADD_WAITING_RECORDING, REMOVE_WAITING_RECORDING},
-    state: {recordings, hasWaitingRec},
+    state: {recordings, hasWaitingRec, settings},
   } = useContext(RecordingsContext);
 
   // reset the state when recording is deleted before saving
@@ -176,8 +176,10 @@ const Recording = ({navigation}) => {
   };
 
   // for the listeners
+  // ----
   const [compassHeading, setCompassHeading] = useState(null);
   const [coords, setCoords] = useState(null);
+  // ----
 
   const [recording, setRecording] = useState();
   const [canSaveRecording, setCanSaveRecording] = useState(true);
@@ -229,7 +231,7 @@ const Recording = ({navigation}) => {
       const progressUpdateIntervalMillis = 200;
 
       const {recording} = await Audio.Recording.createAsync(
-        await recordingOptions(),
+        await recordingOptions(settings.highQuality),
         onRecordingStatusUpdate,
         progressUpdateIntervalMillis,
       );

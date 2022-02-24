@@ -1,4 +1,4 @@
-import {createContext} from 'react';
+import {createContext, useContext} from 'react';
 import * as FileSystem from 'expo-file-system';
 import {Audio} from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -7,41 +7,42 @@ import {zip as zipFolder} from 'react-native-zip-archive';
 
 export const RecordingsContext = createContext();
 
-export const recordingsReducer = (
-  {recordings, hasWaitingRec},
-  {type, payload},
-) => {
+export const recordingsReducer = (prevState, {type, payload}) => {
   switch (type) {
     case 'ADD_NEW_RECORDING':
       return {
-        loading: false,
-        recordings: [...recordings, payload],
-        hasWaitingRec,
+        ...prevState,
+        recordings: [payload, ...prevState.recordings],
       };
 
     case 'DELETE_RECORDINGS':
       return {
-        loading: false,
+        ...prevState,
         recordings: payload,
-        hasWaitingRec,
       };
 
     case 'RETRIEVE_RECORDINGS':
       return {
-        loading: false,
+        ...prevState,
         recordings: payload,
-        hasWaitingRec,
       };
+
+    case 'RETRIEVE_SETTINGS':
+      return {
+        ...prevState,
+        loading: false,
+        settings: payload.settings,
+      };
+
     case 'ADD_WAITING_RECORDING':
       return {
-        loading: false,
-        recordings,
+        ...prevState,
         hasWaitingRec: payload.hasWaitingRec,
       };
+
     case 'REMOVE_WAITING_RECORDING':
       return {
-        loading: false,
-        recordings,
+        ...prevState,
         hasWaitingRec: payload.hasWaitingRec,
       };
   }
@@ -65,8 +66,8 @@ export const pathToImagesFolder = FileSystem.documentDirectory + 'Images/';
 export const pathToZippedFolder = FileSystem.documentDirectory + 'Zipped/';
 
 // get settings in storage
-export const getRecordingQuality = async () =>
-  JSON.parse(await AsyncStorage.getItem('recordingQuality'));
+export const getHighQuality = async () =>
+  JSON.parse(await AsyncStorage.getItem('highQuality'));
 
 export const getSaveRecordings = async () =>
   JSON.parse(await AsyncStorage.getItem('saveRecordings'));
@@ -135,23 +136,6 @@ export const recordingsMemo = (dispatch, recordings) => ({
         );
       }
 
-      const recordingQuality = await getRecordingQuality();
-      const saveRecordings = await getSaveRecordings();
-      const playbackOffset = await getPlaybackOffset();
-      const stereoMode = await getStereoMode();
-
-      if (recordingQuality === null || recordingQuality === undefined)
-        await AsyncStorage.setItem('recordingQuality', JSON.stringify(true));
-
-      if (saveRecordings === null || saveRecordings === undefined)
-        await AsyncStorage.setItem('saveRecordings', JSON.stringify(true));
-
-      if (playbackOffset === null || playbackOffset === undefined)
-        await AsyncStorage.setItem('playbackOffset', JSON.stringify(0));
-
-      if (stereoMode === null || stereoMode === undefined)
-        await AsyncStorage.setItem('stereoMode', JSON.stringify(true));
-
       // here we take a look at the zipped file we have in the file system, if they have been created
       // since more than a month we delete them for getting more free space on the device.
       // this is not crucial, but helps saving space, another approach would be not to save the zipped
@@ -186,6 +170,48 @@ export const recordingsMemo = (dispatch, recordings) => ({
     } catch (e) {
       console.log(e, 'error while getting folders info in file system');
     }
+  },
+  RETRIEVE_SETTINGS: async () => {
+    // this function will retrieve the settings in the mobile storage, so that it won't be collected multiple times. if
+    // they don't exist in the storage we set them to defaults
+    const highQuality = await getHighQuality();
+    const saveRecordings = await getSaveRecordings();
+    const playbackOffset = await getPlaybackOffset();
+    const stereoMode = await getStereoMode();
+
+    if (highQuality === null || highQuality === undefined)
+      await AsyncStorage.setItem('highQuality', JSON.stringify(true));
+
+    if (saveRecordings === null || saveRecordings === undefined)
+      await AsyncStorage.setItem('saveRecordings', JSON.stringify(true));
+
+    if (playbackOffset === null || playbackOffset === undefined)
+      await AsyncStorage.setItem('playbackOffset', JSON.stringify(0));
+
+    if (stereoMode === null || stereoMode === undefined)
+      await AsyncStorage.setItem('stereoMode', JSON.stringify(true));
+
+    dispatch({
+      type: 'RETRIEVE_SETTINGS',
+      payload: {
+        settings: {
+          stereoMode:
+            stereoMode === null || stereoMode === undefined ? true : stereoMode,
+          highQuality:
+            highQuality === null || highQuality === undefined
+              ? true
+              : highQuality,
+          saveRecordings:
+            saveRecordings === null || saveRecordings === undefined
+              ? true
+              : saveRecordings,
+          playbackOffset:
+            playbackOffset === null || playbackOffset === undefined
+              ? 0
+              : playbackOffset,
+        },
+      },
+    });
   },
   ADD_NEW_RECORDING: newRecording => {
     // this function moves the recording and the additional photo from the temporary cache dir
@@ -227,7 +253,7 @@ export const recordingsMemo = (dispatch, recordings) => ({
 
         await FileSystem.writeAsStringAsync(
           pathToJSON,
-          JSON.stringify([...recordings, payload]),
+          JSON.stringify([payload, ...recordings]),
           options,
         );
 
@@ -463,11 +489,9 @@ const HIGH_QUALITY_PRESETS = {
   ios: iosRecordingPresetHighQuality,
 };
 
-export const recordingOptions = async () => ({
+export const recordingOptions = async highQuality => ({
   isMeteringEnabled: true, // this is crucial for ui metering animations
-  ...(JSON.parse(await AsyncStorage.getItem('recordingQuality')) === true
-    ? HIGH_QUALITY_PRESETS
-    : LOW_QUALITY_PRESETS),
+  ...(highQuality ? HIGH_QUALITY_PRESETS : LOW_QUALITY_PRESETS),
 });
 
 export const formatMillis = millis => {

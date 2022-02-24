@@ -11,38 +11,43 @@ import {
   Text,
   Button,
   Animated,
-  TouchableWithoutFeedback,
   Platform,
   TextInput,
   Alert,
-  ActivityIndicator,
 } from 'react-native';
 import {Audio} from 'expo-av';
 import PhotoModal from '@components/recordingDetails/photoModal';
 import PlayerComponent from '@components/recordingDetails/playerComponent';
 import DeleteButton from '@components/recordingDetails/deleteButton';
-import {useIsFocused} from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+
 import styles from '@styles/styles';
-import {
-  pathToRecordingsFolder,
-  RecordingsContext,
-  getPlaybackOffset,
-} from '@utils/recordings';
+import {pathToRecordingsFolder, RecordingsContext} from '@utils/recordings';
 import Spinner from 'react-native-loading-spinner-overlay';
 import EventItemCard from '@components/recordingDetails/EventItemCard';
-import CustomShareIcon from '../navigation/CustomShareIcon';
+import {useIsFocused} from '@react-navigation/native';
 
 const RecordingDetails = ({route, navigation}) => {
   const {
-    utils: {EXPORT_RECORDINGS, RENAME_RECORDING},
+    utils: {RENAME_RECORDING},
+    state: {settings},
   } = useContext(RecordingsContext);
+
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    setPlaybackOffset(settings.playbackOffset);
+  }, [settings.playbackOffset]);
+
+  useEffect(() => {
+    if (!isFocused && soundObject) soundObject.unloadAsync();
+
+    if (recording.audioUri) bootstrapAudio();
+    else setIsLoading(false);
+  }, [isFocused]);
 
   const {
     params: {recording},
   } = route;
-
-  const isFocused = useIsFocused();
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -54,54 +59,10 @@ const RecordingDetails = ({route, navigation}) => {
   const [highlighted, setHighlighted] = useState();
   const [title, setTitle] = useState(recording.recordingName);
 
-  const [playbackOffset, setPlaybackOffset] = useState(0);
-
-  const [isProcessingExport, setIsProcessingExport] = useState(false);
-
-  useEffect(() => {
-    if (!isFocused && soundObject) soundObject.unloadAsync();
-  }, [isFocused]);
-
-  useEffect(() => {
-    if (recording.audioUri) bootstrapAudio();
-    else setIsLoading(false);
-
-    const getOffset = async () => {
-      setPlaybackOffset(await getPlaybackOffset());
-    };
-
-    getOffset();
-  }, []);
+  const [playbackOffset, setPlaybackOffset] = useState(settings.playbackOffset);
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      ...Platform.select({
-        android: {
-          headerRight: () => (
-            <TouchableWithoutFeedback
-              onPress={async () => {
-                await EXPORT_RECORDINGS([recording], setIsProcessingExport);
-              }}>
-              <View style={{marginRight: 20}}>
-                {!isProcessingExport ? (
-                  <Icon name={'export'} size={27} color={'#fff'} />
-                ) : (
-                  <ActivityIndicator size="large" color={'#fff'} />
-                )}
-              </View>
-            </TouchableWithoutFeedback>
-          ),
-        },
-        ios: {
-          headerRight: () => (
-            <CustomShareIcon
-              onPress={async () => {
-                await EXPORT_RECORDINGS([recording], setIsProcessingExport);
-              }}
-            />
-          ),
-        },
-      }),
       headerTitle: () => (
         <TextInput
           value={title}
@@ -123,7 +84,7 @@ const RecordingDetails = ({route, navigation}) => {
         />
       ),
     });
-  }, [navigation, title, isProcessingExport]);
+  }, [title]);
 
   const bootstrapAudio = async () => {
     try {
@@ -241,7 +202,18 @@ const RecordingDetails = ({route, navigation}) => {
   };
 
   const showNoRecordingAlert = () => {
-    Alert.alert('Attention', 'This recording does not contain any audio file.');
+    Alert.alert(
+      'Attention',
+      'This recording does not contain any audio file. If you want to change this setting go to Settings page.',
+      [
+        {text: 'Cancel'},
+        {
+          text: 'Go to Settings',
+          onPress: () => navigation.jumpTo('SettingsStack'),
+          style: 'cancel',
+        },
+      ],
+    );
   };
 
   if (isLoading)

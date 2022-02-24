@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import React, {useEffect, useMemo, useReducer} from 'react';
-import {useColorScheme, LogBox} from 'react-native';
+import {LogBox} from 'react-native';
 import {connectActionSheet} from '@expo/react-native-action-sheet';
 import {requestPermissions} from '@utils/permissions';
 
@@ -19,34 +19,37 @@ LogBox.ignoreLogs([
 ]);
 
 const App = () => {
-  const initialRecordingState = {
+  const initialState = {
     loading: true,
     recordings: [],
-    hasWaitingRec: false,
+    hasWaitingRec: false, // if not false we store the name of the recording that will be saved
+    settings: {
+      stereoMode: true,
+      highQuality: true,
+      saveRecordings: true,
+      playbackOffset: 0,
+    },
   };
 
   useEffect(() => {
-    const {RETRIEVE_RECORDINGS} = recordingsContext;
+    const {RETRIEVE_RECORDINGS, RETRIEVE_SETTINGS} = recordingsContext;
     RETRIEVE_RECORDINGS();
+    RETRIEVE_SETTINGS();
 
     requestPermissions();
   }, []);
 
-  const [recordingsState, dispatch] = useReducer(
-    recordingsReducer,
-    initialRecordingState,
-  );
+  const [state, dispatch] = useReducer(recordingsReducer, initialState);
 
   const recordingsContext = useMemo(
-    () => recordingsMemo(dispatch, recordingsState.recordings),
-    [recordingsState.recordings],
+    () => recordingsMemo(dispatch, state.recordings),
+    [state.recordings],
   );
 
-  if (recordingsState.loading) return null;
+  if (state.loading) return null;
 
   return (
-    <RecordingsContext.Provider
-      value={{utils: recordingsContext, state: recordingsState}}>
+    <RecordingsContext.Provider value={{utils: recordingsContext, state}}>
       <MainNavigator />
     </RecordingsContext.Provider>
   );
