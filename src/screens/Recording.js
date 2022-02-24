@@ -1,4 +1,10 @@
-import React, {useRef, useState, useContext, useEffect} from 'react';
+import React, {
+  useRef,
+  useState,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+} from 'react';
 import {
   Platform,
   View,
@@ -10,6 +16,7 @@ import {
 } from 'react-native';
 import RecordButton from '@components/recording/RecordButton';
 import ImageComponent from '@components/recording/ImageComponent';
+import {CompassComponent} from '@components/recording/CompassComponent';
 import Geolocation from 'react-native-geolocation-service';
 import CompassHeading from 'react-native-compass-heading';
 import Ionicon from 'react-native-vector-icons/Ionicons';
@@ -21,14 +28,10 @@ import {
 } from '@utils/recordings';
 import flatlistContainerStyle from '@styles/styles';
 import EventCardItem from '@components/recording/EventCardItem';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useIsFocused} from '@react-navigation/native';
 import CustomMicOffIcon from '@navigation/CustomMicOffIcon';
 import {requestPermissions} from '@utils/permissions';
 
 const Recording = ({navigation}) => {
-  const focused = useIsFocused();
-
   const {
     utils: {ADD_NEW_RECORDING, ADD_WAITING_RECORDING, REMOVE_WAITING_RECORDING},
     state: {recordings, hasWaitingRec, settings},
@@ -42,7 +45,7 @@ const Recording = ({navigation}) => {
   // compass heading observer
   useEffect(() => {
     CompassHeading.start(3, ({heading}) => {
-      console.log(heading, 'watching compass heading changes...');
+      // console.log(heading, 'watching compass heading changes...');
       setCompassHeading(heading);
     });
 
@@ -68,7 +71,7 @@ const Recording = ({navigation}) => {
           });
 
           return () => {
-            Geolocation.clearWatch();
+            Geolocation.stopObserving();
           };
         } else {
           setCoords(null);
@@ -80,48 +83,31 @@ const Recording = ({navigation}) => {
     };
 
     startLocationObserver();
-  });
+  }, []);
 
-  useEffect(() => {
-    const canSaveRec = async () => {
-      const canSaveRecording = JSON.parse(
-        await AsyncStorage.getItem('saveRecordings'),
-      );
-      setCanSaveRecording(canSaveRecording);
-
-      return canSaveRecording;
-    };
-
-    canSaveRec().then(canSave => {
-      navigation.setOptions({
-        ...Platform.select({
-          android: {
-            headerLeft: () => {
-              // to do: check if it's rendered properly
-              return (
-                !canSave && (
-                  <TouchableWithoutFeedback onPress={() => showMicOffAlert()}>
-                    <View style={{left: 10, padding: 2, marginHorizontal: 10}}>
-                      <Ionicon name={'mic-off'} size={26} color={'#8b0000'} />
-                    </View>
-                  </TouchableWithoutFeedback>
-                )
-              );
-            },
-          },
-          ios: {
-            headerLeft: () => {
-              return (
-                !canSave && (
-                  <CustomMicOffIcon onPress={() => showMicOffAlert()} />
-                )
-              );
-            },
-          },
-        }),
-      });
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      ...Platform.select({
+        android: {
+          headerLeft: () =>
+            // to do: check if it's rendered properly
+            !settings.saveRecordings && (
+              <TouchableWithoutFeedback onPress={() => showMicOffAlert()}>
+                <View style={{left: 10, padding: 2, marginHorizontal: 10}}>
+                  <Ionicon name={'mic-off'} size={26} color={'#8b0000'} />
+                </View>
+              </TouchableWithoutFeedback>
+            ),
+        },
+        ios: {
+          headerLeft: () =>
+            !settings.saveRecordings && (
+              <CustomMicOffIcon onPress={() => showMicOffAlert()} />
+            ),
+        },
+      }),
     });
-  }, [focused]);
+  }, [settings.saveRecordings]);
 
   const showMicOffAlert = () => {
     Alert.alert(
@@ -317,6 +303,9 @@ const Recording = ({navigation}) => {
               imageUri={imageUri}
               ADD_WAITING_RECORDING={ADD_WAITING_RECORDING}
             />
+          </View>
+          <View style={[flatlistContainerStyle.itemContainer, {paddingTop: 0}]}>
+            <CompassComponent degrees={compassHeading} />
           </View>
           <View style={flatlistContainerStyle.itemContainer}>
             <RecordButton

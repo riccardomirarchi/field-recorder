@@ -143,7 +143,7 @@ function LibraryS() {
 function RecordingS() {
   const {
     utils: {REMOVE_WAITING_RECORDING, ADD_WAITING_RECORDING},
-    state: {hasWaitingRec},
+    state: {hasWaitingRec, settings},
   } = useContext(RecordingsContext);
 
   useEffect(() => {

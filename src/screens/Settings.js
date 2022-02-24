@@ -20,13 +20,12 @@ const Settings = () => {
   };
 
   const toggleSaveRec = async () => {
+    settings.saveRecordings = !saveRecordingsEnabled;
     setSaveRecordings(!saveRecordingsEnabled);
     await AsyncStorage.setItem(
       'saveRecordings',
       JSON.stringify(!saveRecordingsEnabled),
     );
-
-    settings.saveRecordings = !saveRecordingsEnabled;
 
     if (saveRecordingsEnabled) {
       setStereoMode(false);
