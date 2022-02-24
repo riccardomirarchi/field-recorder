@@ -28,10 +28,7 @@ const PlayerComponent = ({
         style={[
           styles.iconContainer,
           {
-            width: 40,
             justifyContent: 'flex-start',
-            flexDirection: 'row',
-            marginBottom: 1,
           },
         ]}>
         <TouchableWithoutFeedback
@@ -73,10 +70,7 @@ const PlayerComponent = ({
         style={[
           styles.iconContainer,
           {
-            width: 40,
             justifyContent: 'flex-end',
-            flexDirection: 'row',
-            marginBottom: 1,
           },
         ]}>
         <Animated.Text style={{fontSize: 18, color: 'gray'}}>

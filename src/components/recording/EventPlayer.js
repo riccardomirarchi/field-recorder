@@ -1,6 +1,6 @@
 import React, {useRef, useState, useEffect} from 'react';
 import {View, Animated, Alert} from 'react-native';
-import {utilsStyles} from '@styles/styles';
+import {WINDOW_SIZE} from '@styles/styles';
 import PlayerComponent from '@components/recordingDetails/playerComponent';
 
 import {Audio} from 'expo-av';
@@ -38,12 +38,10 @@ const EventPlayer = ({
 
   const [eventTitle, setTitle] = useState(event?.title);
   const [description, setDescription] = useState(event?.description);
-  const [isLoading, setIsLoading] = useState(true);
   const animation = useRef(new Animated.Value(0)).current;
   const [playing, setPlaying] = useState(false);
   const [position, setPosition] = useState(0);
   const [soundObject, setSoundObject] = useState();
-  const [error, setError] = useState();
   const descriptionInput = useRef();
 
   const updateEvents = () => {
@@ -74,12 +72,8 @@ const EventPlayer = ({
       );
 
       setSoundObject(soundObject);
-
-      setIsLoading(false);
     } catch (e) {
       console.log(e);
-      setError(e);
-      setIsLoading(false);
     }
   };
 
@@ -133,50 +127,44 @@ const EventPlayer = ({
     }).start();
   };
 
-  // if (isRecording) return null
-
   return (
     <View>
-      <View style={[utilsStyles.ph25, {width: 335}]}>
-        <View style={{marginVertical: 20}}>
-          <PlayerComponent
-            playing={playing}
-            animation={animation}
-            onPress={() => (playing ? stopAndSetToEvent() : listenRecording())}
-            onPressDisabled={() =>
-              Alert.alert(
-                'Attention',
-                'You cannot play this event because the recording is still going. Stop the recording and come back!',
-              )
-            }
-            disabled={isRecording}
-            position={position}
-            duration={duration}
-            fromEvent={true}
-            style={{
-              width: 200,
-              playerWidth: 160,
-            }}
-          />
-        </View>
+      <PlayerComponent
+        playing={playing}
+        animation={animation}
+        onPress={() => (playing ? stopAndSetToEvent() : listenRecording())}
+        onPressDisabled={() =>
+          Alert.alert(
+            'Attention',
+            'You cannot play this event because the recording is still going. Stop the recording and come back!',
+          )
+        }
+        disabled={isRecording}
+        position={position}
+        duration={duration}
+        fromEvent={true}
+        style={{
+          width: WINDOW_SIZE.width / 1.36,
+          playerWidth: WINDOW_SIZE.width / 2.4,
+        }}
+      />
 
-        <Input
-          placeholder={'Event title'}
-          onChangeText={setTitle}
-          value={eventTitle}
-          onSubmitEditing={() => descriptionInput.current.focus()}
-          editable={opened}
-          onEndEditing={() => updateEvents()}
-        />
-        <Input
-          placeholder={'Description'}
-          onChangeText={setDescription}
-          value={description}
-          ref={descriptionInput}
-          editable={opened}
-          onEndEditing={() => updateEvents()}
-        />
-      </View>
+      <Input
+        placeholder={'Event title'}
+        onChangeText={setTitle}
+        value={eventTitle}
+        onSubmitEditing={() => descriptionInput.current.focus()}
+        editable={opened}
+        onEndEditing={() => updateEvents()}
+      />
+      <Input
+        placeholder={'Description'}
+        onChangeText={setDescription}
+        value={description}
+        ref={descriptionInput}
+        editable={opened}
+        onEndEditing={() => updateEvents()}
+      />
     </View>
   );
 };

@@ -1,6 +1,6 @@
 import React, {useRef, useState} from 'react';
 import {Animated, TouchableWithoutFeedback, Text, View} from 'react-native';
-import flatlistContainerStyle from '@styles/styles';
+import flatlistContainerStyle, {WINDOW_SIZE} from '@styles/styles';
 import Icon from 'react-native-vector-icons/AntDesign';
 import EventPlayer from './EventPlayer';
 import {formatMillis} from '@utils/recordings';
@@ -16,7 +16,28 @@ const EventCardItem = ({
   setMarkedEvents,
 }) => {
   const [opened, setOpened] = useState(false);
+  const [selectionActive, setSelection] = useState(false);
   const openingAnimation = useRef(new Animated.Value(0)).current;
+
+  const selectAnimation = useRef(new Animated.Value(0)).current;
+
+  const closeSelectionDialog = () => {
+    Animated.timing(selectAnimation, {
+      toValue: 0,
+      useNativeDriver: false,
+      duration: 200,
+    }).start(() => setSelection(false));
+  };
+
+  const openSelectionDialog = () => {
+    compressEvent();
+
+    Animated.timing(selectAnimation, {
+      toValue: 1,
+      useNativeDriver: false,
+      duration: 200,
+    }).start(() => setSelection(true));
+  };
 
   const expandEvent = () => {
     Animated.spring(openingAnimation, {
@@ -36,7 +57,7 @@ const EventCardItem = ({
 
   const height = openingAnimation.interpolate({
     inputRange: [0, 1],
-    outputRange: [55, 280],
+    outputRange: [55, 250],
   });
 
   const transform = [
@@ -48,63 +69,97 @@ const EventCardItem = ({
     },
   ];
 
-  return (
-    <Animated.View
-      style={[
-        flatlistContainerStyle.cardItemContainer,
-        {
-          height,
-        },
-      ]}>
-      <TouchableWithoutFeedback
-        onPress={() => {
-          opened ? compressEvent() : expandEvent();
-        }}>
-        <View style={flatlistContainerStyle.innerViewStyle}>
-          <Text
-            style={[flatlistContainerStyle.cardItemTextStyle, {paddingTop: 4}]}>
-            {`${item.title}  -  ${formatMillis(item.millisFromBeginning)}`}
-          </Text>
+  const width = selectAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [WINDOW_SIZE.width - 50, WINDOW_SIZE.width - 130],
+  });
 
-          <AnimatedIcon
-            name={'downcircle'}
-            size={24}
-            style={{
-              color: 'gray',
-              transform,
-            }}
-          />
-        </View>
-      </TouchableWithoutFeedback>
-      <Animated.View
+  return (
+    <TouchableWithoutFeedback
+      onPress={() => {
+        opened ? compressEvent() : selectionActive ? null : expandEvent();
+      }}
+      onLongPress={() =>
+        selectionActive ? closeSelectionDialog() : openSelectionDialog()
+      }>
+      <View
         style={{
-          opacity: openingAnimation.interpolate({
-            inputRange: [0, 1],
-            outputRange: [-5, 1],
-          }),
-          position: 'absolute',
-          zIndex: openingAnimation.interpolate({
-            inputRange: [0, 1],
-            outputRange: [-1, 1],
-          }),
-          height: openingAnimation.interpolate({
-            inputRange: [0, 1],
-            outputRange: [0, 180],
-          }),
-          // backgroundColor: 'blue',
-          paddingVertical: 0,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
         }}>
-        <EventPlayer
-          event={item}
-          opened={opened}
-          duration={duration}
-          isRecording={isRecording}
-          audioUri={audioUri}
-          index={index}
-          setMarkedEvents={setMarkedEvents}
-        />
-      </Animated.View>
-    </Animated.View>
+        <Animated.View
+          style={[
+            flatlistContainerStyle.cardItemContainer,
+            {
+              height,
+              width,
+            },
+          ]}>
+          <View style={[flatlistContainerStyle.innerViewStyle]}>
+            <Text
+              style={[
+                flatlistContainerStyle.cardItemTextStyle,
+                {paddingTop: 3},
+              ]}>
+              {`${item.title}  -  ${formatMillis(item.millisFromBeginning)}`}
+            </Text>
+
+            <AnimatedIcon
+              name={'downcircle'}
+              size={24}
+              style={{
+                color: 'gray',
+                transform,
+              }}
+            />
+          </View>
+
+          {/* inner event player */}
+          <Animated.View
+            style={{
+              opacity: openingAnimation.interpolate({
+                inputRange: [0, 1],
+                outputRange: [-5, 1],
+              }),
+              zIndex: openingAnimation.interpolate({
+                inputRange: [0, 1],
+                outputRange: [-1, 1],
+              }),
+              marginTop: 38,
+            }}>
+            <EventPlayer
+              event={item}
+              opened={opened}
+              duration={duration}
+              isRecording={isRecording}
+              audioUri={audioUri}
+              index={index}
+              setMarkedEvents={setMarkedEvents}
+            />
+          </Animated.View>
+        </Animated.View>
+
+        {/* circle */}
+        <TouchableWithoutFeedback
+          onPress={() => alert('to be implemented: delete selected event')}>
+          <Animated.View
+            style={{
+              position: 'absolute',
+              right: 21,
+              bottom: 25,
+              opacity: selectAnimation,
+              transform: [
+                {
+                  scale: selectAnimation,
+                },
+              ],
+            }}>
+            <Icon name={'delete'} size={24} color={'#8b0000'} />
+          </Animated.View>
+        </TouchableWithoutFeedback>
+      </View>
+    </TouchableWithoutFeedback>
   );
 };
 

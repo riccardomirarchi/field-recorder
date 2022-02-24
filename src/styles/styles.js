@@ -1,6 +1,6 @@
-import { StyleSheet, StatusBar, Dimensions } from 'react-native';
-import { getStatusBarHeight } from 'react-native-iphone-x-helper';
-import { getBottomSpace } from 'react-native-iphone-x-helper';
+import {StyleSheet, StatusBar, Dimensions} from 'react-native';
+import {getStatusBarHeight} from 'react-native-iphone-x-helper';
+import {getBottomSpace} from 'react-native-iphone-x-helper';
 
 export const WINDOW_SIZE = Dimensions.get('window');
 export const SCREEN_SIZE = Dimensions.get('screen');
@@ -115,6 +115,9 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     marginHorizontal: 10,
+    width: 40,
+    flexDirection: 'row',
+    marginBottom: 1,
   },
 
   // card item style
@@ -123,7 +126,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     flexDirection: 'row',
-    marginBottom: 10,
+    marginBottom: 10, // better remove it and add to the childrens
     borderWidth: 0.8,
     shadowRadius: 10,
     shadowColor: '#464646',
@@ -133,7 +136,7 @@ const styles = StyleSheet.create({
     height: 70,
     backgroundColor: '#fff',
     elevation: 10,
-    width: WINDOW_SIZE.width - 50
+    width: WINDOW_SIZE.width - 50,
   },
   innerViewStyle: {
     flexDirection: 'row',

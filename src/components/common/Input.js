@@ -9,7 +9,8 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     zIndex: 2,
     height: 45,
-    marginVertical: 15,
+    marginTop: 20,
+    marginBottom: 2,
   },
 });
 
