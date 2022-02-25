@@ -39,7 +39,8 @@ const Recording = ({navigation}) => {
 
   // reset the state when recording is deleted before saving
   useEffect(() => {
-    if (!hasWaitingRec && audioUri !== undefined) resetState();
+    if (!hasWaitingRec && (audioUri !== undefined || imageUri !== null))
+      resetState();
   }, [hasWaitingRec]);
 
   // compass heading observer
@@ -308,7 +309,9 @@ const Recording = ({navigation}) => {
             <ImageComponent
               setImageUri={setImageUri}
               imageUri={imageUri}
-              ADD_WAITING_RECORDING={ADD_WAITING_RECORDING}
+              ADD_WAITING_RECORDING={() =>
+                ADD_WAITING_RECORDING(`Recording ${recordings.length + 1}`)
+              }
             />
           </View>
           <View style={[flatlistContainerStyle.itemContainer, {paddingTop: 0}]}>

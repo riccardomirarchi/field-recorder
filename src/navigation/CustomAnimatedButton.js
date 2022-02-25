@@ -1,4 +1,4 @@
-import React, {useState, useRef, useContext} from 'react';
+import React, {useState, useRef, useContext, useEffect} from 'react';
 import {
   TouchableWithoutFeedback,
   Animated,
@@ -39,64 +39,33 @@ const styles = StyleSheet.create({
 });
 
 const CustomAnimatedButton = props => {
+  const {navigation} = props;
+
   const {
     state: {hasWaitingRec},
   } = useContext(RecordingsContext);
 
-  const {navigation} = props;
-
-  const [opened, setOpened] = useState(false);
   const animation = useRef(new Animated.Value(0)).current;
 
-  const toggleMenu = () => {
-    Animated.spring(animation, {
-      toValue: opened ? 0 : 1,
-      friction: 5,
+  useEffect(() => {
+    if (hasWaitingRec) showRecordHidePlusIcon();
+    else showPlusHideRecordIcon();
+  }, [hasWaitingRec]);
+
+  const showPlusHideRecordIcon = () => {
+    Animated.timing(animation, {
+      toValue: 0,
+      duration: 200,
       useNativeDriver: true,
     }).start();
-
-    setOpened(x => !x);
   };
 
-  const translateY = animation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, -80],
-  });
-
-  const rotation = {
-    transform: [
-      {
-        rotate: animation.interpolate({
-          inputRange: [0, 1],
-          outputRange: ['0deg', '45deg'],
-        }),
-      },
-    ],
-  };
-
-  const pin = {
-    transform: [
-      {
-        scale: animation,
-      },
-      {
-        translateY,
-      },
-    ],
-  };
-
-  const text = {
-    transform: [
-      {
-        scale: animation,
-      },
-      {
-        translateY,
-      },
-      {
-        translateX: translateY,
-      },
-    ],
+  const showRecordHidePlusIcon = () => {
+    Animated.timing(animation, {
+      toValue: 1,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
   };
 
   return (
@@ -122,7 +91,7 @@ const CustomAnimatedButton = props => {
         <TouchableWithoutFeedback
           onPress={() => {
             navigation.jumpTo('RecordingStack');
-            toggleMenu();
+            // toggleMenu();
           }}>
           <View style={[styles.btnStyle, styles.secondaryBtn]}>
             <Icon name={'record-circle'} size={18} color={'#fff'} />
@@ -132,14 +101,38 @@ const CustomAnimatedButton = props => {
 
       <TouchableWithoutFeedback
         onPress={() => navigation.jumpTo('RecordingStack')}>
-        <Animated.View style={[styles.btnStyle]}>
-          <Icon
-            name={!hasWaitingRec ? 'plus' : 'record-circle'}
-            size={24}
-            color={'#fff'}
-          />
-          {/* <Icon name={'plus'} size={24} color={'#fff'} /> */}
-        </Animated.View>
+        <View style={[styles.btnStyle]}>
+          <Animated.View
+            style={{
+              position: 'absolute',
+              opacity: animation.interpolate({
+                inputRange: [0, 1],
+                outputRange: [1, 0],
+              }),
+              transform: [
+                {
+                  scale: animation.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [1, 0],
+                  }),
+                },
+              ],
+            }}>
+            <Icon name={'plus'} size={24} color={'#fff'} />
+          </Animated.View>
+          <Animated.View
+            style={{
+              position: 'absolute',
+              opacity: animation,
+              transform: [
+                {
+                  scale: animation,
+                },
+              ],
+            }}>
+            <Icon name={'record-circle'} size={24} color={'#fff'} />
+          </Animated.View>
+        </View>
       </TouchableWithoutFeedback>
     </View>
   );

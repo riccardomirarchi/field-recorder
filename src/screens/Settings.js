@@ -134,30 +134,30 @@ const Settings = () => {
         }
       />
       <CardItem
-        text={'Event Playback Offset'}
+        text={'Event Playback Offset (in seconds)'}
         rightElement={
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              marginRight: 5,
-            }}>
-            <TextInput
-              placeholder="0"
-              keyboardType="number-pad"
-              onChangeText={text => validateInput(text)}
-              onEndEditing={({nativeEvent: {text}}) => saveOffsetValue(text)}
-              value={playbackOffset}
-              style={{
-                marginHorizontal: 2,
-              }}
-              returnKeyType="go"
-              textContentType="none"
-              cancelButtonTitle="Cancel"
-              placeholderTextColor={'#808080'}
-            />
-            <Text>secs</Text>
-          </View>
+          // <View
+          //   style={{
+          //     flexDirection: 'row',
+          //     alignItems: 'center',
+          //     marginRight: 5,
+          //   }}>
+          <TextInput
+            placeholder="0"
+            keyboardType="number-pad"
+            onChangeText={text => validateInput(text)}
+            onEndEditing={({nativeEvent: {text}}) => saveOffsetValue(text)}
+            value={playbackOffset}
+            // style={{
+            //   width: 20,
+            // }}
+            returnKeyType="go"
+            textContentType="none"
+            cancelButtonTitle="Cancel"
+            placeholderTextColor={'#808080'}
+          />
+          // {/* <Text>secs</Text> */}
+          // </View>
         }
       />
     </View>

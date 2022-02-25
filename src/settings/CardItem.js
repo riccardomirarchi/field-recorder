@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, Animated} from 'react-native';
+import {Text, Animated} from 'react-native';
 import styles from '@styles/styles';
 
 const CardItem = ({text, rightElement, style = {}}) => {
