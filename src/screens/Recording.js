@@ -64,20 +64,27 @@ const Recording = ({navigation}) => {
         const permissionStatus = await requestPermissions();
 
         if (permissionStatus === 'granted') {
-          Geolocation.watchPosition(position => {
-            const {accuracy, latitude, longitude} = position.coords;
-            console.log(
-              {accuracy, latitude, longitude},
-              'watching position changes...',
-            );
-            setCoords({accuracy, latitude, longitude});
-          });
+          Geolocation.watchPosition(
+            position => {
+              const {accuracy, latitude, longitude} = position.coords;
+              console.log(
+                {accuracy, latitude, longitude},
+                'watching position changes...',
+              );
+              setCoords({accuracy, latitude, longitude});
+            },
+            error => console.log(error),
+            {
+              enableHighAccuracy: true,
+              distanceFilter: 50,
+              showsBackgroundLocationIndicator: true,
+            },
+          );
 
           return () => {
             Geolocation.stopObserving();
           };
         } else {
-          setCoords(null);
           console.log('geolocation permissions not granted :(');
         }
       } catch (e) {
@@ -297,6 +304,7 @@ const Recording = ({navigation}) => {
     <FlatList
       data={markedEvents}
       contentContainerStyle={flatlistContainerStyle.container}
+      showsVerticalScrollIndicator={false}
       ListHeaderComponent={
         <View>
           <View style={[flatlistContainerStyle.itemContainer, {paddingTop: 0}]}>

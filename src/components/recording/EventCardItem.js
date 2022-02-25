@@ -21,11 +21,16 @@ const EventCardItem = ({
 
   const selectAnimation = useRef(new Animated.Value(0)).current;
 
-  const closeSelectionDialog = () => {
+  const deleteEvent = () => {
+    setMarkedEvents(events => events.filter(event => event !== item));
+    closeSelectionDialog(0);
+  };
+
+  const closeSelectionDialog = (timing = 200) => {
     Animated.timing(selectAnimation, {
       toValue: 0,
       useNativeDriver: false,
-      duration: 200,
+      duration: timing,
     }).start(() => setSelection(false));
   };
 
@@ -122,9 +127,13 @@ const EventCardItem = ({
                 inputRange: [0, 1],
                 outputRange: [-5, 1],
               }),
+              height: openingAnimation.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, 180],
+              }),
               zIndex: openingAnimation.interpolate({
                 inputRange: [0, 1],
-                outputRange: [-1, 1],
+                outputRange: [-2, 1],
               }),
               marginTop: 38,
             }}>
@@ -141,8 +150,7 @@ const EventCardItem = ({
         </Animated.View>
 
         {/* circle */}
-        <TouchableWithoutFeedback
-          onPress={() => alert('to be implemented: delete selected event')}>
+        <TouchableWithoutFeedback onPress={() => deleteEvent()}>
           <Animated.View
             style={{
               position: 'absolute',
