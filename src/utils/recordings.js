@@ -437,61 +437,65 @@ export const recordingsMemo = (dispatch, recordings) => ({
   },
 });
 
+const getChannels = settings => (settings.stereoMode ? 2 : 1);
+
 // low quality recording presets (default)
-const iosRecordingPreset = {
+const iosRecordingPreset = settings => ({
   extension: '.caf',
   audioQuality: Audio.RECORDING_OPTION_IOS_AUDIO_QUALITY_MIN,
   sampleRate: 44100,
-  numberOfChannels: 1,
+  numberOfChannels: getChannels(settings),
   bitRate: 128000,
   linearPCMBitDepth: 16,
   linearPCMIsBigEndian: false,
   linearPCMIsFloat: false,
-};
+});
 
-const androidRecordingPreset = {
+const androidRecordingPreset = settings => ({
   extension: '.m4a',
   outputFormat: Audio.RECORDING_OPTION_ANDROID_OUTPUT_FORMAT_MPEG_4,
   audioEncoder: Audio.RECORDING_OPTION_ANDROID_AUDIO_ENCODER_AAC,
   sampleRate: 44100,
-  numberOfChannels: 1,
+  numberOfChannels: getChannels(settings),
   bitRate: 96000,
-};
+});
 
 // high quality rec presets
-const iosRecordingPresetHighQuality = {
+const iosRecordingPresetHighQuality = settings => ({
   extension: '.caf',
   audioQuality: Audio.RECORDING_OPTION_IOS_AUDIO_QUALITY_MAX,
   sampleRate: 44100,
-  numberOfChannels: 1,
+  numberOfChannels: getChannels(settings),
   bitRate: 320000,
   linearPCMBitDepth: 16,
   linearPCMIsBigEndian: false,
   linearPCMIsFloat: false,
-};
+});
 
-const androidRecordingPresetHighQuality = {
+const androidRecordingPresetHighQuality = settings => ({
   extension: '.m4a',
   outputFormat: Audio.RECORDING_OPTION_ANDROID_OUTPUT_FORMAT_MPEG_4,
   audioEncoder: Audio.RECORDING_OPTION_ANDROID_AUDIO_ENCODER_AAC,
   sampleRate: 44100,
-  numberOfChannels: 1,
+  numberOfChannels: getChannels(settings),
   bitRate: 320000,
-};
+});
 
-const LOW_QUALITY_PRESETS = {
-  android: androidRecordingPreset,
-  ios: iosRecordingPreset,
-};
+const LOW_QUALITY_PRESETS = settings => ({
+  android: androidRecordingPreset(settings),
+  ios: iosRecordingPreset(settings),
+});
 
-const HIGH_QUALITY_PRESETS = {
-  android: androidRecordingPresetHighQuality,
-  ios: iosRecordingPresetHighQuality,
-};
+const HIGH_QUALITY_PRESETS = settings => ({
+  android: androidRecordingPresetHighQuality(settings),
+  ios: iosRecordingPresetHighQuality(settings),
+});
 
-export const recordingOptions = async highQuality => ({
+export const recordingOptions = async settings => ({
   isMeteringEnabled: true, // this is crucial for ui metering animations
-  ...(highQuality ? HIGH_QUALITY_PRESETS : LOW_QUALITY_PRESETS),
+  ...(settings.highQuality
+    ? HIGH_QUALITY_PRESETS(settings)
+    : LOW_QUALITY_PRESETS(settings)),
 });
 
 export const formatMillis = millis => {

@@ -106,7 +106,8 @@ const Library = ({navigation, route}) => {
             <TouchableWithoutFeedback
               onPress={async () => {
                 await EXPORT_RECORDINGS(getRecordings(), setIsProcessingExport);
-              }}>
+              }}
+              disabled={!selectionOpened}>
               <Animated.View
                 style={{
                   marginRight: 20,
@@ -180,6 +181,7 @@ const Library = ({navigation, route}) => {
                     setIsProcessingExport,
                   );
                 }}
+                disabled={!selectionOpened}
               />
             </Animated.View>
           ),

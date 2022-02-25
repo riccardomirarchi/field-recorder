@@ -1,4 +1,4 @@
-import React, {useRef, useEffect} from 'react';
+import React from 'react';
 import {Animated} from 'react-native';
 
 export const CompassComponent = ({degrees}) => {
@@ -25,10 +25,10 @@ export const CompassComponent = ({degrees}) => {
     <Animated.Image
       source={require('@components/assets/images/north_2.png')}
       style={{
-        width: 50,
-        height: 50,
+        width: 60,
+        height: 60,
         // transform,
-        transform: [{rotate: `${360 - degrees}deg`}]
+        transform: [{rotate: `${360 - degrees}deg`}],
       }}
     />
   );

@@ -144,7 +144,7 @@ const EventPlayer = ({
         duration={duration}
         fromEvent={true}
         style={{
-          width: WINDOW_SIZE.width / 1.36,
+          width: WINDOW_SIZE.width / 1.32,
           playerWidth: WINDOW_SIZE.width / 2.4,
         }}
       />

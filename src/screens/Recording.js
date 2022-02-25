@@ -30,15 +30,12 @@ import flatlistContainerStyle from '@styles/styles';
 import EventCardItem from '@components/recording/EventCardItem';
 import CustomMicOffIcon from '@navigation/CustomMicOffIcon';
 import {requestPermissions} from '@utils/permissions';
-import {useIsFocused} from '@react-navigation/native';
 
 const Recording = ({navigation}) => {
   const {
     utils: {ADD_NEW_RECORDING, ADD_WAITING_RECORDING, REMOVE_WAITING_RECORDING},
     state: {recordings, hasWaitingRec, settings},
   } = useContext(RecordingsContext);
-
-  const focused = useIsFocused();
 
   // reset the state when recording is deleted before saving
   useEffect(() => {
@@ -117,7 +114,7 @@ const Recording = ({navigation}) => {
         },
       }),
     });
-  }, [settings.saveRecordings, focused]);
+  }, [settings.saveRecordings]);
 
   const showMicOffAlert = () => {
     Alert.alert(
@@ -226,7 +223,7 @@ const Recording = ({navigation}) => {
       const progressUpdateIntervalMillis = 200;
 
       const {recording} = await Audio.Recording.createAsync(
-        await recordingOptions(settings.highQuality),
+        await recordingOptions(settings),
         onRecordingStatusUpdate,
         progressUpdateIntervalMillis,
       );

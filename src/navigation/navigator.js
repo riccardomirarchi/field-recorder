@@ -1,4 +1,4 @@
-import React, {useContext, useState, useEffect} from 'react';
+import React, {useContext, useState, useEffect, useRef} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
@@ -6,6 +6,7 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {createStackNavigator} from '@react-navigation/stack';
 import {labelOptions, screenOptions} from '@navigation/utils';
 import {
+  Animated,
   Platform,
   TouchableWithoutFeedback,
   StatusBar,
@@ -15,7 +16,7 @@ import {
   View,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign';
-import {Icon as MaterialIcon} from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {ActionSheetProvider} from '@expo/react-native-action-sheet';
 import CustomShareIcon from '../navigation/CustomShareIcon';
 
@@ -141,13 +142,35 @@ function LibraryS() {
 }
 
 function RecordingS() {
+  const deleteIconAnimation = useRef(new Animated.Value(0)).current;
+
   const {
     utils: {REMOVE_WAITING_RECORDING, ADD_WAITING_RECORDING},
-    state: {hasWaitingRec, settings},
+    state: {hasWaitingRec},
   } = useContext(RecordingsContext);
 
+  const showRecIcon = () => {
+    Animated.timing(deleteIconAnimation, {
+      toValue: 1,
+      duration: 100,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const hideRecIcon = () => {
+    Animated.timing(deleteIconAnimation, {
+      toValue: 0,
+      duration: 100,
+      useNativeDriver: true,
+    }).start();
+  };
+
   useEffect(() => {
-    if (!hasWaitingRec) setTitle('New Recording');
+    if (hasWaitingRec) showRecIcon();
+    if (!hasWaitingRec) {
+      hideRecIcon();
+      setTitle('New Recording');
+    }
   }, [hasWaitingRec]);
 
   const [title, setTitle] = useState();
@@ -170,10 +193,21 @@ function RecordingS() {
           ...Platform.select({
             android: {
               headerRight: () => (
-                <TouchableWithoutFeedback onPress={() => showAlertToReset()}>
-                  <View style={{marginRight: 20}}>
+                <TouchableWithoutFeedback
+                  onPress={() => showAlertToReset()}
+                  disabled={!hasWaitingRec}>
+                  <Animated.View
+                    style={{
+                      marginRight: 20,
+                      opacity: deleteIconAnimation,
+                      transform: [
+                        {
+                          scale: deleteIconAnimation,
+                        },
+                      ],
+                    }}>
                     <Icon name={'delete'} size={24} color={'#fff'} />
-                  </View>
+                  </Animated.View>
                 </TouchableWithoutFeedback>
               ),
             },
