@@ -188,7 +188,7 @@ const Library = ({navigation, route}) => {
         },
       }),
     });
-  }, [selectedIndexes, isProcessingExport]);
+  }, [selectedIndexes, isProcessingExport, selectionOpened]);
 
   const getRecordings = () => {
     return selectedIndexes.map(index => recordings[index]);
