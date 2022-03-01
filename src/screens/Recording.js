@@ -1,25 +1,11 @@
-import React, {
-  useRef,
-  useState,
-  useContext,
-  useEffect,
-  useLayoutEffect,
-} from 'react';
-import {
-  Platform,
-  View,
-  Animated,
-  FlatList,
-  Button,
-  Alert,
-  TouchableWithoutFeedback,
-} from 'react-native';
+import React, {useRef, useState, useContext, useEffect} from 'react';
+import {View, Animated, FlatList, Button, Alert} from 'react-native';
 import RecordButton from '@components/recording/RecordButton';
 import ImageComponent from '@components/recording/ImageComponent';
 import {CompassComponent} from '@components/recording/CompassComponent';
 import Geolocation from 'react-native-geolocation-service';
 import CompassHeading from 'react-native-compass-heading';
-import Ionicon from 'react-native-vector-icons/Ionicons';
+
 import {Audio} from 'expo-av';
 import {
   RecordingsContext,
@@ -28,7 +14,7 @@ import {
 } from '@utils/recordings';
 import flatlistContainerStyle from '@styles/styles';
 import EventCardItem from '@components/recording/EventCardItem';
-import CustomMicOffIcon from '@navigation/CustomMicOffIcon';
+
 import {requestPermissions} from '@utils/permissions';
 
 const Recording = ({navigation}) => {
@@ -92,45 +78,6 @@ const Recording = ({navigation}) => {
 
     startLocationObserver();
   }, []);
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      ...Platform.select({
-        android: {
-          headerLeft: () =>
-            // to do: check if it's rendered properly
-            !settings.saveRecordings && (
-              <TouchableWithoutFeedback onPress={() => showMicOffAlert()}>
-                <View style={{left: 10, padding: 2, marginHorizontal: 10}}>
-                  <Ionicon name={'mic-off'} size={26} color={'#8b0000'} />
-                </View>
-              </TouchableWithoutFeedback>
-            ),
-        },
-        ios: {
-          headerLeft: () =>
-            !settings.saveRecordings && (
-              <CustomMicOffIcon onPress={() => showMicOffAlert()} />
-            ),
-        },
-      }),
-    });
-  }, [settings.saveRecordings]);
-
-  const showMicOffAlert = () => {
-    Alert.alert(
-      'Information',
-      "This icon means that the audio file won't be saved in the device storage. If you want to keep the file you can change the setting in the Settings page.",
-      [
-        {text: 'Cancel'},
-        {
-          text: 'Go to Settings',
-          onPress: () => navigation.jumpTo('SettingsStack'),
-          style: 'cancel',
-        },
-      ],
-    );
-  };
 
   const resetState = () => {
     console.log('resetting recording state...');
