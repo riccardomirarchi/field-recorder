@@ -16,6 +16,8 @@ import {
   View,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign';
+import CustomMicOffIcon from '@navigation/CustomMicOffIcon';
+import Ionicon from 'react-native-vector-icons/Ionicons';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {ActionSheetProvider} from '@expo/react-native-action-sheet';
 import CustomShareIcon from '../navigation/CustomShareIcon';
@@ -45,7 +47,6 @@ const RecordingStack = createStackNavigator();
 const MainBottomTabs = createBottomTabNavigator();
 
 const options = (navigation, additionalOptions = {}) => ({
-  ...additionalOptions,
   ...Platform.select({
     ios: {
       headerLeft: props => (
@@ -87,6 +88,7 @@ const options = (navigation, additionalOptions = {}) => ({
     fontSize: 22,
     color: '#FFF',
   },
+  ...additionalOptions,
 });
 
 function LibraryS() {
@@ -141,12 +143,13 @@ function LibraryS() {
   );
 }
 
-function RecordingS() {
+function RecordingS(props) {
   const deleteIconAnimation = useRef(new Animated.Value(0)).current;
+  const {navigation} = props;
 
   const {
     utils: {REMOVE_WAITING_RECORDING, ADD_WAITING_RECORDING},
-    state: {hasWaitingRec},
+    state: {hasWaitingRec, settings},
   } = useContext(RecordingsContext);
 
   const showRecIcon = () => {
@@ -186,6 +189,21 @@ function RecordingS() {
     ]);
   };
 
+  const showMicOffAlert = () => {
+    Alert.alert(
+      'Information',
+      "This icon means that the audio file won't be saved in the device storage. If you want to keep the file you can change the setting in the Settings page.",
+      [
+        {text: 'Cancel'},
+        {
+          text: 'Go to Settings',
+          onPress: () => navigation.jumpTo('SettingsStack'),
+          style: 'cancel',
+        },
+      ],
+    );
+  };
+
   return (
     <RecordingStack.Navigator
       screenOptions={({navigation}) =>
@@ -210,11 +228,27 @@ function RecordingS() {
                   </Animated.View>
                 </TouchableWithoutFeedback>
               ),
+              headerLeft: () =>
+                // to do: check if it's rendered properly
+                !settings.saveRecordings && (
+                  <TouchableWithoutFeedback onPress={() => showMicOffAlert()}>
+                    <View style={{left: 10, padding: 2, marginHorizontal: 10}}>
+                      <Ionicon name={'mic-off'} size={26} color={'#8b0000'} />
+                    </View>
+                  </TouchableWithoutFeedback>
+                ),
             },
             ios: {
-              headerRight: () =>
-                hasWaitingRec && (
-                  <CustomReloadIcon onPress={() => showAlertToReset()} />
+              headerRight: () => (
+                <CustomReloadIcon
+                  onPress={() => showAlertToReset()}
+                  disabled={!hasWaitingRec}
+                  deleteIconAnimation={deleteIconAnimation}
+                />
+              ),
+              headerLeft: () =>
+                !settings.saveRecordings && (
+                  <CustomMicOffIcon onPress={() => showMicOffAlert()} />
                 ),
             },
           }),
