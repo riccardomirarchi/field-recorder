@@ -24,13 +24,15 @@ const CardItem = ({
     }
   }, [selectionOpened]);
 
-  useEffect(() => {
-    if (selected && !selectedIndexes.includes(index)) {
+  const selectRecording = () => {
+    setSelected(x => !x);
+
+    if (!selected && !selectedIndexes.includes(index)) {
       setIndexes(indexes => [...indexes, index]);
     } else {
       setIndexes(indexes => indexes.filter(value => value !== index));
     }
-  }, [selected]);
+  };
 
   const width = animation.interpolate({
     inputRange: [0, 1],
@@ -42,11 +44,11 @@ const CardItem = ({
       onPress={() => {
         !selectionOpened
           ? navigation.navigate('Recording Details', {recording: item})
-          : setSelected(x => !x);
+          : selectRecording();
       }}
       onLongPress={() => {
         openSelection();
-        setSelected(true);
+        selectRecording();
       }}>
       <View
         style={{
