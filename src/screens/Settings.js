@@ -7,6 +7,7 @@ import {RecordingsContext} from '@utils/recordings';
 
 const Settings = () => {
   const {
+    utils: {UPDATE_SETTINGS},
     state: {settings},
   } = useContext(RecordingsContext);
 
@@ -16,11 +17,11 @@ const Settings = () => {
       'highQuality',
       JSON.stringify(!highQualityEnabled),
     );
-    settings.highQuality = !highQualityEnabled;
+    UPDATE_SETTINGS({highQuality: !highQualityEnabled});
   };
 
   const toggleSaveRec = async () => {
-    settings.saveRecordings = !saveRecordingsEnabled;
+    UPDATE_SETTINGS({saveRecordings: !saveRecordingsEnabled});
     setSaveRecordings(!saveRecordingsEnabled);
     await AsyncStorage.setItem(
       'saveRecordings',
@@ -42,14 +43,14 @@ const Settings = () => {
       JSON.stringify(value ? parseInt(value) : 0),
     );
 
-    settings.playbackOffset = value || 0;
+    UPDATE_SETTINGS({playbackOffset: value || 0});
   };
 
   const toggleMode = async () => {
     setStereoMode(!stereoMode);
     await AsyncStorage.setItem('stereoMode', JSON.stringify(!stereoMode));
 
-    settings.stereoMode = !stereoMode;
+    UPDATE_SETTINGS({stereoMode: !stereoMode});
   };
 
   const validateInput = text => {

@@ -1,8 +1,10 @@
 import React from 'react';
-import { TouchableOpacity } from 'react-native';
+import {TouchableOpacity, Animated} from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign';
 
-const CustomReloadIcon = ({ onPress }) => {
+const AnimatedIcon = Animated.createAnimatedComponent(Icon);
+
+const CustomReloadIcon = ({onPress, disabled, deleteIconAnimation}) => {
   return (
     <TouchableOpacity
       style={{
@@ -13,8 +15,21 @@ const CustomReloadIcon = ({ onPress }) => {
         elevation: 5,
         flex: 1,
       }}
-      onPress={onPress}>
-      <Icon name={'delete'} size={24} color={'#fff'} />
+      onPress={onPress}
+      disabled={disabled}>
+      <AnimatedIcon
+        name={'delete'}
+        size={24}
+        style={{
+          color: '#fff',
+          opacity: deleteIconAnimation,
+          transform: [
+            {
+              scale: deleteIconAnimation,
+            },
+          ],
+        }}
+      />
     </TouchableOpacity>
   );
 };

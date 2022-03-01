@@ -45,6 +45,14 @@ export const recordingsReducer = (prevState, {type, payload}) => {
         ...prevState,
         hasWaitingRec: payload.hasWaitingRec,
       };
+    case 'UPDATE_SETTINGS':
+      return {
+        ...prevState,
+        settings: {
+          ...prevState.settings,
+          ...payload.setting,
+        },
+      };
   }
 };
 
@@ -433,6 +441,12 @@ export const recordingsMemo = (dispatch, recordings) => ({
     dispatch({
       type: 'REMOVE_WAITING_RECORDING',
       payload: {hasWaitingRec: false},
+    });
+  },
+  UPDATE_SETTINGS: setting => {
+    dispatch({
+      type: 'UPDATE_SETTINGS',
+      payload: {setting},
     });
   },
 });
