@@ -1,20 +1,5 @@
-import React, {
-  useState,
-  useLayoutEffect,
-  useEffect,
-  useRef,
-  useContext,
-} from 'react';
-import {
-  View,
-  FlatList,
-  Text,
-  Button,
-  Animated,
-  Platform,
-  TextInput,
-  Alert,
-} from 'react-native';
+import React, {useState, useEffect, useRef, useContext} from 'react';
+import {View, FlatList, Text, Button, Animated, Alert} from 'react-native';
 import {Audio} from 'expo-av';
 import PhotoModal from '@components/recordingDetails/photoModal';
 import PlayerComponent from '@components/recordingDetails/playerComponent';
@@ -28,26 +13,23 @@ import {useIsFocused} from '@react-navigation/native';
 
 const RecordingDetails = ({route, navigation}) => {
   const {
-    utils: {RENAME_RECORDING},
     state: {settings},
   } = useContext(RecordingsContext);
+
+  const {
+    params: {recording},
+  } = route;
 
   const isFocused = useIsFocused();
 
   useEffect(() => {
-    setPlaybackOffset(settings.playbackOffset);
-  }, [settings.playbackOffset]);
-
-  useEffect(() => {
+    // performance improvement: when unfocusing screen the audio buffer is removed from memory
+    //  will be reloaded only if the screen is focused again
     if (!isFocused && soundObject) soundObject.unloadAsync();
 
     if (recording.audioUri) bootstrapAudio();
     else setIsLoading(false);
   }, [isFocused]);
-
-  const {
-    params: {recording},
-  } = route;
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -57,34 +39,6 @@ const RecordingDetails = ({route, navigation}) => {
   const [position, setPosition] = useState(0);
   const animation = useRef(new Animated.Value(0)).current;
   const [highlighted, setHighlighted] = useState();
-  const [title, setTitle] = useState(recording.recordingName);
-
-  const [playbackOffset, setPlaybackOffset] = useState(settings.playbackOffset);
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerTitle: () => (
-        <TextInput
-          value={title}
-          onChangeText={val => setTitle(val)}
-          style={{
-            fontSize: 22,
-            color: '#FFF',
-            fontWeight: '600',
-            width: Platform.OS == 'android' ? 250 : null,
-          }}
-          placeholder="Recording..."
-          placeholderTextColor={'rgba(255, 255, 255, 0.5)'}
-          returnKeyType="go"
-          textContentType="none"
-          cancelButtonTitle="Cancel"
-          onEndEditing={({nativeEvent: {text}}) =>
-            RENAME_RECORDING(text, recording)
-          }
-        />
-      ),
-    });
-  }, [title]);
 
   const bootstrapAudio = async () => {
     try {
@@ -172,14 +126,14 @@ const RecordingDetails = ({route, navigation}) => {
 
   const listenFromEvent = async millis => {
     try {
-      const position = millis - playbackOffset * 1000;
+      const position = millis - settings.playbackOffset * 1000;
 
       await soundObject.playFromPositionAsync(position <= 0 ? 0 : position);
       console.log(
         'started listening event from ',
         millis,
         'with',
-        playbackOffset,
+        settings.playbackOffset,
         'seconds of offset',
       );
     } catch (e) {

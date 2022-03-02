@@ -221,7 +221,7 @@ export const recordingsMemo = (dispatch, recordings) => ({
       },
     });
   },
-  ADD_NEW_RECORDING: newRecording => {
+  ADD_NEW_RECORDING: (newRecording, saveRecordings) => {
     // this function moves the recording and the additional photo from the temporary cache dir
     // to the document directory of the app which contains a dedicated folder for both images and recordings
     // then it updates the json with all the new recordings' info and the state
@@ -230,10 +230,8 @@ export const recordingsMemo = (dispatch, recordings) => ({
       let audioFileName = null;
       let imageFileName = null;
 
-      const saveRecordings = await getSaveRecordings();
-
       try {
-        // if we can sav the file we move it in the right directory, otherwise we delete the file from the cache dir
+        // if we can sav the file we move it in the right directory, otherwise we delete the audio file from the cache dir
         if (saveRecordings) {
           audioFileName = newRecording.audioUri.split('/').pop();
           await FileSystem.moveAsync({

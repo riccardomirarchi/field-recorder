@@ -23,7 +23,7 @@ const Recording = ({navigation}) => {
     state: {recordings, hasWaitingRec, settings},
   } = useContext(RecordingsContext);
 
-  // reset the state when recording is deleted before saving
+  // reset the state when recording is discarded
   useEffect(() => {
     if (!hasWaitingRec && (audioUri !== undefined || imageUri !== null))
       resetState();
@@ -32,7 +32,6 @@ const Recording = ({navigation}) => {
   // compass heading observer
   useEffect(() => {
     CompassHeading.start(0, ({heading}) => {
-      // console.log(heading, 'watching compass heading changes...');
       setCompassHeading(heading);
     });
 
@@ -94,7 +93,7 @@ const Recording = ({navigation}) => {
   };
 
   const saveRecording = newRecording => {
-    ADD_NEW_RECORDING(newRecording)
+    ADD_NEW_RECORDING(newRecording, settings.saveRecordings)
       .then(() => {
         Alert.alert('Success', 'You successfully saved a new recording!', [
           {

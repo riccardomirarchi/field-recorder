@@ -300,7 +300,7 @@ PODS:
     - React
   - react-native-image-picker (4.7.3):
     - React-Core
-  - react-native-safe-area-context (4.0.2):
+  - react-native-safe-area-context (4.1.2):
     - RCT-Folly
     - RCTRequired
     - RCTTypeSafety
@@ -375,15 +375,15 @@ PODS:
     - React-Core
   - RNCMaskedView (0.2.6):
     - React-Core
-  - RNGestureHandler (2.2.0):
+  - RNGestureHandler (2.3.0):
     - React-Core
   - RNScreens (3.13.0):
     - React-Core
     - React-RCTImage
   - RNShare (7.3.6):
     - React-Core
-  - RNSVG (12.1.1):
-    - React
+  - RNSVG (12.3.0):
+    - React-Core
   - RNVectorIcons (9.1.0):
     - React-Core
   - RNZipArchive (6.0.6):
@@ -644,7 +644,7 @@ SPEC CHECKSUMS:
   react-native-compass-heading: f3a8fcfcd578b26ab97283e5c0fb0f02a764013e
   react-native-geolocation-service: c0efb872258ed9240f1003a70fca9e9757e5c785
   react-native-image-picker: 4e6008ad8c2321622affa2c85432a5ebd02d480c
-  react-native-safe-area-context: dc737e639172fa08f909d8674b907fe32c8c01f3
+  react-native-safe-area-context: 114e9a74df2643012b9d6cc1460b94f3b6a90780
   React-perflogger: 93d3f142d6d9a46e635f09ba0518027215a41098
   React-RCTActionSheet: 87327c3722203cc79cf79d02fb83e7332aeedd18
   React-RCTAnimation: 009c87c018d50e0b38692699405ebe631ff4872d
@@ -659,10 +659,10 @@ SPEC CHECKSUMS:
   ReactCommon: 650e33cde4fb7d36781cd3143f5276da0abb2f96
   RNCAsyncStorage: b49b4e38a1548d03b74b30e558a1d18465b94be7
   RNCMaskedView: c298b644a10c0c142055b3ae24d83879ecb13ccd
-  RNGestureHandler: bf572f552ea324acd5b5464b8d30755b2d8c1de6
+  RNGestureHandler: 77d59828d40838c9fabb76a12d2d0a80c006906f
   RNScreens: aa12070b21c1d6011b3627a0b1d09b627232b070
   RNShare: b955e66f1af2849711f13c193debda72b94f8aa0
-  RNSVG: 551acb6562324b1d52a4e0758f7ca0ec234e278f
+  RNSVG: 302bfc9905bd8122f08966dc2ce2d07b7b52b9f8
   RNVectorIcons: 7923e585eaeb139b9f4531d25a125a1500162a0b
   RNZipArchive: 9e6af1bebc9c7ddb42893bc4e70804321227c3ec
   SSZipArchive: 62d4947b08730e4cda640473b0066d209ff033c9

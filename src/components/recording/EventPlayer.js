@@ -1,11 +1,10 @@
-import React, {useRef, useState, useEffect} from 'react';
+import React, {useRef, useState, useEffect, useContext} from 'react';
 import {View, Animated, Alert} from 'react-native';
 import {WINDOW_SIZE} from '@styles/styles';
 import PlayerComponent from '@components/recordingDetails/playerComponent';
-
+import {RecordingsContext} from '@utils/recordings';
 import {Audio} from 'expo-av';
 import Input from '@components/common/Input';
-import {getPlaybackOffset} from '../../utils/recordings';
 
 const EventPlayer = ({
   event,
@@ -16,6 +15,10 @@ const EventPlayer = ({
   index,
   setMarkedEvents,
 }) => {
+  const {
+    state: {settings},
+  } = useContext(RecordingsContext);
+
   useEffect(() => {
     if (opened && !isRecording) {
       bootstrapAudio();
@@ -26,16 +29,6 @@ const EventPlayer = ({
     }
   }, [opened, isRecording]);
 
-  useEffect(() => {
-    const getOffset = async () => {
-      setPlaybackOffset(await getPlaybackOffset());
-    };
-
-    getOffset();
-  }, []);
-
-  const [playbackOffset, setPlaybackOffset] = useState(0);
-
   const [eventTitle, setTitle] = useState(event?.title);
   const [description, setDescription] = useState(event?.description);
   const animation = useRef(new Animated.Value(0)).current;
@@ -44,13 +37,22 @@ const EventPlayer = ({
   const [soundObject, setSoundObject] = useState();
   const descriptionInput = useRef();
 
-  const updateEvents = () => {
+  const modifyEventName = title => {
     setMarkedEvents(events => {
-      events[index].title = eventTitle;
+      events[index].title = title;
+
+      return events;
+    });
+    setTitle(title);
+  };
+
+  const modifyDescriptionName = description => {
+    setMarkedEvents(events => {
       events[index].description = description;
 
       return events;
     });
+    setDescription(description);
   };
 
   const bootstrapAudio = async () => {
@@ -95,7 +97,8 @@ const EventPlayer = ({
 
   const listenRecording = async () => {
     try {
-      const position = event?.millisFromBeginning - playbackOffset * 1000;
+      const position =
+        event?.millisFromBeginning - settings.playbackOffset * 1000;
 
       await soundObject.playFromPositionAsync(position <= 0 ? 0 : position);
       console.log('started listening');
@@ -151,19 +154,19 @@ const EventPlayer = ({
 
       <Input
         placeholder={'Event title'}
-        onChangeText={setTitle}
+        onChangeText={text => modifyEventName(text)}
         value={eventTitle}
         onSubmitEditing={() => descriptionInput.current.focus()}
         editable={opened}
-        onEndEditing={() => updateEvents()}
+        // onEndEditing={() => modifyEventName()}
       />
       <Input
         placeholder={'Description'}
-        onChangeText={setDescription}
+        onChangeText={text => modifyDescriptionName(text)}
         value={description}
         ref={descriptionInput}
         editable={opened}
-        onEndEditing={() => updateEvents()}
+        // onEndEditing={() => updateEvents()}
       />
     </View>
   );

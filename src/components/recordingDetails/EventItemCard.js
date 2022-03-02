@@ -1,5 +1,5 @@
 import React, {useEffect, useRef} from 'react';
-import {TouchableWithoutFeedback, Animated} from 'react-native';
+import {TouchableWithoutFeedback, Animated, View} from 'react-native';
 import styles from '@styles/styles';
 import Icon from 'react-native-vector-icons/AntDesign';
 import {formatMillis} from '../../utils/recordings';
@@ -48,21 +48,39 @@ const EventItemCard = ({onPress, item, highlighted}) => {
         style={[
           styles.cardItemContainer,
           {
-            height: 55,
+            height: item.description
+              ? item.description.length > 43
+                ? 120
+                : 100
+              : 55,
             justifyContent: 'space-between',
             backgroundColor,
           },
         ]}>
-        <Animated.Text
-          style={[styles.cardItemTextStyle, {color: textColor}]}>{`${
-          item.title
-        }  -  ${formatMillis(item.millisFromBeginning)}`}</Animated.Text>
+        <View style={styles.innerViewStyle}>
+          <Animated.Text
+            style={[
+              styles.cardItemTextStyle,
+              {color: textColor, paddingTop: 4},
+            ]}>{`${item.title}  -  ${formatMillis(
+            item.millisFromBeginning,
+          )}`}</Animated.Text>
 
-        <AnimatedIcon
-          name={'playcircleo'}
-          size={24}
-          style={{color: iconColor}}
-        />
+          <AnimatedIcon
+            name={'playcircleo'}
+            size={24}
+            style={{color: iconColor}}
+          />
+        </View>
+
+        {item.description && (
+          <View style={{marginTop: 30, marginLeft: '-0.1%'}}>
+            <Animated.Text
+              style={[styles.cardItemTextStyle, {color: textColor}]}>
+              {item.description}
+            </Animated.Text>
+          </View>
+        )}
       </Animated.View>
     </TouchableWithoutFeedback>
   );

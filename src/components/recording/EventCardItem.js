@@ -1,5 +1,11 @@
 import React, {useRef, useState} from 'react';
-import {Animated, TouchableWithoutFeedback, Text, View} from 'react-native';
+import {
+  Animated,
+  TouchableWithoutFeedback,
+  Text,
+  View,
+  Alert,
+} from 'react-native';
 import flatlistContainerStyle, {WINDOW_SIZE} from '@styles/styles';
 import Icon from 'react-native-vector-icons/AntDesign';
 import EventPlayer from './EventPlayer';
@@ -20,6 +26,24 @@ const EventCardItem = ({
   const openingAnimation = useRef(new Animated.Value(0)).current;
 
   const selectAnimation = useRef(new Animated.Value(0)).current;
+
+  const alertToDeleteEvent = () => {
+    Alert.alert(
+      'Attention',
+      `Are you sure you want to delete the selected event?`,
+      [
+        {
+          text: 'Proceed',
+          style: 'destructive',
+          onPress: () => deleteEvent(),
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+      ],
+    );
+  };
 
   const deleteEvent = () => {
     setMarkedEvents(events => events.filter(event => event !== item));
@@ -107,7 +131,7 @@ const EventCardItem = ({
                 flatlistContainerStyle.cardItemTextStyle,
                 {paddingTop: 3},
               ]}>
-              {`${item.title}  -  ${formatMillis(item.millisFromBeginning)}`}
+              {`Marked at ${formatMillis(item.millisFromBeginning)}`}
             </Text>
 
             <AnimatedIcon
@@ -135,7 +159,8 @@ const EventCardItem = ({
                 inputRange: [0, 1],
                 outputRange: [-2, 1],
               }),
-              marginTop: 38,
+              marginTop: 40,
+              marginLeft: '-1.4%',
             }}>
             <EventPlayer
               event={item}
@@ -150,7 +175,7 @@ const EventCardItem = ({
         </Animated.View>
 
         {/* circle */}
-        <TouchableWithoutFeedback onPress={() => deleteEvent()}>
+        <TouchableWithoutFeedback onPress={() => alertToDeleteEvent()}>
           <Animated.View
             style={{
               position: 'absolute',

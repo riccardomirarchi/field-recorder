@@ -93,9 +93,10 @@ const options = (navigation, additionalOptions = {}) => ({
 
 function LibraryS() {
   const [isProcessingExport, setIsProcessingExport] = useState(false);
+  const [title, setTitle] = useState();
 
   const {
-    utils: {EXPORT_RECORDINGS},
+    utils: {EXPORT_RECORDINGS, RENAME_RECORDING},
   } = useContext(RecordingsContext);
 
   return (
@@ -137,6 +138,26 @@ function LibraryS() {
               ),
             },
           }),
+          headerTitle: () => (
+            <TextInput
+              value={title ? title : recording.recordingName}
+              onChangeText={val => setTitle(val)}
+              style={{
+                fontSize: 22,
+                color: '#FFF',
+                fontWeight: '600',
+                width: Platform.OS == 'android' ? 250 : null,
+              }}
+              placeholder="Recording..."
+              placeholderTextColor={'rgba(255, 255, 255, 0.5)'}
+              returnKeyType="go"
+              textContentType="none"
+              cancelButtonTitle="Cancel"
+              onEndEditing={({nativeEvent: {text}}) =>
+                RENAME_RECORDING(text, recording)
+              }
+            />
+          ),
         })}
       />
     </LibraryStack.Navigator>
