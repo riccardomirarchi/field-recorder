@@ -20,6 +20,25 @@ const styles = StyleSheet.create({
     paddingVertical: 40,
   },
 
+  // tabs delete and export icon container
+  botttomIconContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    bottom: Platform.OS == 'android' ? 110 : 120,
+    left: 20,
+    width: 55,
+    height: 55,
+    borderRadius: 55 / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowRadius: 10,
+    shadowColor: '#001B48',
+    shadowOpacity: 0.25,
+    elevation: 10,
+    zIndex: 5,
+  },
+
   // ios header style
   iosHeaderStyle: {
     position: 'absolute',

@@ -1,10 +1,18 @@
 import React, {useState, useEffect, useRef, useContext} from 'react';
-import {View, FlatList, Text, Button, Animated, Alert} from 'react-native';
+import {
+  View,
+  FlatList,
+  Text,
+  Button,
+  Animated,
+  Alert,
+  TouchableWithoutFeedback,
+} from 'react-native';
 import {Audio} from 'expo-av';
 import PhotoModal from '@components/recordingDetails/photoModal';
 import PlayerComponent from '@components/recordingDetails/playerComponent';
 import DeleteButton from '@components/recordingDetails/deleteButton';
-
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import styles from '@styles/styles';
 import {pathToRecordingsFolder, RecordingsContext} from '@utils/recordings';
 import Spinner from 'react-native-loading-spinner-overlay';
@@ -39,6 +47,8 @@ const RecordingDetails = ({route, navigation}) => {
   const [position, setPosition] = useState(0);
   const animation = useRef(new Animated.Value(0)).current;
   const [highlighted, setHighlighted] = useState();
+
+  const exportButtonAnimation = useRef(new Animated.Value(1)).current;
 
   const bootstrapAudio = async () => {
     try {

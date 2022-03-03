@@ -1,4 +1,4 @@
-import React, {useState, useRef, useContext, useEffect} from 'react';
+import React, {useRef, useContext, useEffect} from 'react';
 import {
   TouchableWithoutFeedback,
   Animated,
@@ -70,35 +70,6 @@ const CustomAnimatedButton = props => {
 
   return (
     <View style={styles.container}>
-      <View>
-        {/* <Animated.Text
-          style={[
-            {
-              position: 'absolute',
-              bottom: 54 - 79,
-              left: -70,
-              width: 180,
-              opacity: animation,
-              shadowRadius: 10,
-              shadowColor: 'gray',
-              shadowOpacity: 0.8,
-              color: 'gray',
-            },
-            text,
-          ]}>
-          New audio recording
-        </Animated.Text> */}
-        <TouchableWithoutFeedback
-          onPress={() => {
-            navigation.jumpTo('RecordingStack');
-            // toggleMenu();
-          }}>
-          <View style={[styles.btnStyle, styles.secondaryBtn]}>
-            <Icon name={'record-circle'} size={18} color={'#fff'} />
-          </View>
-        </TouchableWithoutFeedback>
-      </View>
-
       <TouchableWithoutFeedback
         onPress={() => navigation.jumpTo('RecordingStack')}>
         <View style={[styles.btnStyle]}>

@@ -13,7 +13,6 @@ import {
   Platform,
   TouchableWithoutFeedback,
   ActivityIndicator,
-  StyleSheet,
   Alert,
 } from 'react-native';
 import styles from '@styles/styles';
@@ -22,26 +21,6 @@ import {RecordingsContext} from '@utils/recordings';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useIsFocused} from '@react-navigation/native';
 import CustomShareIcon from '@navigation/CustomShareIcon';
-
-const style = StyleSheet.create({
-  container: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'absolute',
-    bottom: Platform.OS == 'android' ? 110 : 120,
-    left: 20,
-    width: 55,
-    height: 55,
-    borderRadius: 55 / 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowRadius: 10,
-    shadowColor: '#001B48',
-    shadowOpacity: 0.25,
-    elevation: 10,
-    zIndex: 5,
-  },
-});
 
 const Library = ({navigation, route}) => {
   const focused = useIsFocused();
@@ -255,7 +234,7 @@ const Library = ({navigation, route}) => {
         disabled={!selectedIndexes.length}>
         <Animated.View
           style={[
-            style.container,
+            styles.botttomIconContainer,
             {
               opacity: animation,
               backgroundColor: !selectedIndexes.length

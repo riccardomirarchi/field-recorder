@@ -397,14 +397,17 @@ export const recordingsMemo = (dispatch, recordings) => ({
 
     // in the end we share the files
     try {
-      setTimeout(() => setIsProcessingExport(false), 500);
+      // setTimeout(() => setIsProcessingExport(false), 500);
 
       await Share.open({
         ...shareOptions,
         urls: await getUrls(),
       });
+
+      setIsProcessingExport(false);
     } catch (e) {
       console.log(e, 'error while sharing file');
+      setIsProcessingExport(false);
     }
   },
   RENAME_RECORDING: async (newRecordingName, recordingToBeRenamed) => {
