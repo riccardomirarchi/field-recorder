@@ -7,17 +7,19 @@ import {
   Animated,
   Alert,
   TouchableWithoutFeedback,
+  Platform,
 } from 'react-native';
 import {Audio} from 'expo-av';
 import PhotoModal from '@components/recordingDetails/photoModal';
 import PlayerComponent from '@components/recordingDetails/playerComponent';
 import DeleteButton from '@components/recordingDetails/deleteButton';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import Icon from 'react-native-vector-icons/AntDesign';
 import styles from '@styles/styles';
 import {pathToRecordingsFolder, RecordingsContext} from '@utils/recordings';
 import Spinner from 'react-native-loading-spinner-overlay';
 import EventItemCard from '@components/recordingDetails/EventItemCard';
 import {useIsFocused} from '@react-navigation/native';
+import CustomIosHeaderIcon from '@navigation/CustomIosHeaderIcon';
 
 const RecordingDetails = ({route, navigation}) => {
   const {
@@ -29,6 +31,36 @@ const RecordingDetails = ({route, navigation}) => {
   } = route;
 
   const isFocused = useIsFocused();
+
+  useEffect(() => {
+    navigation.setOptions({
+      ...Platform.select({
+        android: {
+          headerRight: () => (
+            <TouchableWithoutFeedback onPress={async () => null}>
+              <View style={{marginRight: 20}}>
+                <Icon name={'export'} size={27} color={'#fff'} />
+              </View>
+            </TouchableWithoutFeedback>
+          ),
+        },
+        ios: {
+          headerRight: () => (
+            <CustomIosHeaderIcon
+              onPress={() =>
+                alert('to be implemented: show recording information..')
+              }
+              icon={Icon}
+              iconName={'infocirlce'}
+              iconSize={24}
+              iconColor={'#fff'}
+              additionalStyle={{bottom: 22}}
+            />
+          ),
+        },
+      }),
+    });
+  }, []);
 
   useEffect(() => {
     // performance improvement: when unfocusing screen the audio buffer is removed from memory
@@ -47,8 +79,6 @@ const RecordingDetails = ({route, navigation}) => {
   const [position, setPosition] = useState(0);
   const animation = useRef(new Animated.Value(0)).current;
   const [highlighted, setHighlighted] = useState();
-
-  const exportButtonAnimation = useRef(new Animated.Value(1)).current;
 
   const bootstrapAudio = async () => {
     try {

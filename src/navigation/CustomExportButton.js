@@ -1,41 +1,15 @@
-import React, {useEffect, useRef, useState, useContext} from 'react';
+import React, {useEffect, useRef, useContext} from 'react';
 import {
   TouchableWithoutFeedback,
   Animated,
   View,
-  StyleSheet,
   ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {RecordingsContext} from '@utils/recordings';
+import styles from '@styles/styles';
 
 const AnimatedIcon = Animated.createAnimatedComponent(Icon);
-
-const AnimatedIndicator = Animated.createAnimatedComponent(ActivityIndicator);
-
-const styles = StyleSheet.create({
-  btnStyle: {
-    backgroundColor: '#001B48',
-    width: 55,
-    height: 55,
-    borderRadius: 55 / 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowRadius: 10,
-    shadowColor: '#001B48',
-    shadowOpacity: 0.25,
-    elevation: 10,
-    left: 20,
-    bottom: 20,
-  },
-  container: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'absolute',
-    bottom: Platform.OS == 'android' ? 90 : 100,
-    left: 0,
-  },
-});
 
 const CustomExportButton = ({recording}) => {
   const animation = useRef(new Animated.Value(0)).current;
@@ -46,7 +20,6 @@ const CustomExportButton = ({recording}) => {
   } = useContext(RecordingsContext);
 
   useEffect(() => {
-    console.log(recording);
     Animated.timing(animation, {
       toValue: recording ? 1 : 0,
       useNativeDriver: true,
@@ -62,6 +35,11 @@ const CustomExportButton = ({recording}) => {
     }).start();
   };
 
+  const styleLeft = {
+    left: 0,
+    right: null,
+  };
+
   const style = {
     opacity: animation,
     transform: [
@@ -69,6 +47,8 @@ const CustomExportButton = ({recording}) => {
         scale: animation,
       },
     ],
+    left: 20,
+    right: null,
   };
 
   const activityStyle = {
@@ -96,12 +76,12 @@ const CustomExportButton = ({recording}) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.bottomCircleContainer, styleLeft]}>
       <TouchableWithoutFeedback
         onPress={async () => {
           await EXPORT_RECORDINGS([recording], setProcessing);
         }}>
-        <Animated.View style={[styles.btnStyle, style]}>
+        <Animated.View style={[styles.bottomCircleStyle, style]}>
           <AnimatedIcon
             name={'export'}
             size={22}
@@ -111,7 +91,9 @@ const CustomExportButton = ({recording}) => {
               ...iconStyle,
             }}
           />
-          <AnimatedIndicator style={activityStyle} color={'#fff'} />
+          <Animated.View style={activityStyle}>
+            <ActivityIndicator color={'#fff'} />
+          </Animated.View>
         </Animated.View>
       </TouchableWithoutFeedback>
     </View>

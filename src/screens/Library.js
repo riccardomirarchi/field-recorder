@@ -20,7 +20,7 @@ import CardItem from '@components/library/CardItem';
 import {RecordingsContext} from '@utils/recordings';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useIsFocused} from '@react-navigation/native';
-import CustomShareIcon from '@navigation/CustomShareIcon';
+import CustomIosHeaderIcon from '@navigation/CustomIosHeaderIcon';
 
 const Library = ({navigation, route}) => {
   const focused = useIsFocused();
@@ -153,13 +153,18 @@ const Library = ({navigation, route}) => {
                 }}>
                 {selectedIndexes.length}
               </Text>
-              <CustomShareIcon
+
+              <CustomIosHeaderIcon
                 onPress={async () => {
                   await EXPORT_RECORDINGS(
                     getRecordings(),
                     setIsProcessingExport,
                   );
                 }}
+                icon={Icon}
+                iconName={'export'}
+                iconSize={27}
+                iconColor={'#fff'}
                 disabled={!selectionOpened}
               />
             </Animated.View>
