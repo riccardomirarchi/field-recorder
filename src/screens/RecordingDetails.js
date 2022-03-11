@@ -8,6 +8,7 @@ import {
   Alert,
   TouchableWithoutFeedback,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import {Audio} from 'expo-av';
 import PhotoModal from '@components/recordingDetails/photoModal';
@@ -211,7 +212,11 @@ const RecordingDetails = ({route, navigation}) => {
   };
 
   if (isLoading)
-    return <Spinner visible={isLoading} textContent={'Loading...'} />;
+    return (
+      <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+        <ActivityIndicator color={'grey'} size={'large'} />
+      </View>
+    );
 
   if (error)
     return (

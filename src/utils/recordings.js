@@ -181,7 +181,7 @@ export const recordingsMemo = (dispatch, recordings) => ({
   },
   RETRIEVE_SETTINGS: async () => {
     // this function will retrieve the settings in the mobile storage, so that it won't be collected multiple times. if
-    // they don't exist in the storage we set them to defaults
+    // they don't exist in the storage they are set to defaults
     const highQuality = await getHighQuality();
     const saveRecordings = await getSaveRecordings();
     const playbackOffset = await getPlaybackOffset();

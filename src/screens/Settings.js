@@ -1,5 +1,5 @@
-import React, {useState, useEffect, useRef, useContext} from 'react';
-import {View, Switch, TextInput, Text, Alert, Animated} from 'react-native';
+import React, {useState, useRef, useContext} from 'react';
+import {View, Switch, TextInput, Alert, Animated} from 'react-native';
 import styles from '@styles/styles';
 import CardItem from '../settings/CardItem';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -31,9 +31,21 @@ const Settings = () => {
     if (saveRecordingsEnabled) {
       setStereoMode(false);
       setHighQuality(false);
+
+      Animated.timing(opacity, {
+        toValue: 0.5,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
     } else {
       setStereoMode(settings.stereoMode);
       setHighQuality(settings.highQuality);
+
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
     }
   };
 
@@ -82,24 +94,18 @@ const Settings = () => {
     settings.saveRecordings ? settings.stereoMode : false,
   );
 
-  useEffect(() => {
-    if (!saveRecordingsEnabled && opacity) {
-      Animated.timing(opacity, {
-        toValue: 0.5,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-    } else {
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-    }
-  }, [saveRecordingsEnabled]);
-
   return (
     <View style={styles.container}>
+      <CardItem
+        text={'Save Recordings'}
+        rightElement={
+          <Switch
+            ios_backgroundColor="#808080"
+            onValueChange={toggleSaveRec}
+            value={saveRecordingsEnabled}
+          />
+        }
+      />
       <CardItem
         text={'Stereo'}
         rightElement={
@@ -124,41 +130,21 @@ const Settings = () => {
         }
         style={{opacity}}
       />
-      <CardItem
-        text={'Save Recordings'}
-        rightElement={
-          <Switch
-            ios_backgroundColor="#808080"
-            onValueChange={toggleSaveRec}
-            value={saveRecordingsEnabled}
-          />
-        }
-      />
+
       <CardItem
         text={'Event Playback Offset (in seconds)'}
         rightElement={
-          // <View
-          //   style={{
-          //     flexDirection: 'row',
-          //     alignItems: 'center',
-          //     marginRight: 5,
-          //   }}>
           <TextInput
             placeholder="0"
             keyboardType="number-pad"
             onChangeText={text => validateInput(text)}
             onEndEditing={({nativeEvent: {text}}) => saveOffsetValue(text)}
             value={playbackOffset}
-            // style={{
-            //   width: 20,
-            // }}
             returnKeyType="go"
             textContentType="none"
             cancelButtonTitle="Cancel"
             placeholderTextColor={'#808080'}
           />
-          // {/* <Text>secs</Text> */}
-          // </View>
         }
       />
     </View>
