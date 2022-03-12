@@ -300,7 +300,6 @@ function MainBottomNavigator() {
         tabBarInactiveTintColor: '#d9d9d9',
         tabBarIcon: ({focused, color}) => screenOptions(route, color, focused),
         tabBarLabel: ({focused, color}) => labelOptions(route, color, focused),
-        // tabBarHideOnKeyboard: true
       })}>
       <MainBottomTabs.Screen name={'LibraryStack'} component={LibraryS} />
       <MainBottomTabs.Screen

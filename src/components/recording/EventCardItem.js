@@ -5,6 +5,7 @@ import {
   Text,
   View,
   Alert,
+  Platform,
 } from 'react-native';
 import flatlistContainerStyle, {WINDOW_SIZE} from '@styles/styles';
 import Icon from 'react-native-vector-icons/AntDesign';
@@ -129,7 +130,7 @@ const EventCardItem = ({
             <Text
               style={[
                 flatlistContainerStyle.cardItemTextStyle,
-                {paddingTop: 3},
+                {paddingTop: Platform.OS == 'android' ? '0.6%' : 3},
               ]}>
               {`Marked at ${formatMillis(item.millisFromBeginning)}`}
             </Text>

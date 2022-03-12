@@ -1,9 +1,23 @@
-import React, {useState, useRef, useContext} from 'react';
-import {View, Switch, TextInput, Alert, Animated} from 'react-native';
+import React, {useState, useRef, useContext, useEffect} from 'react';
+import {
+  View,
+  Switch,
+  TextInput,
+  Alert,
+  Animated,
+  Text,
+  TouchableWithoutFeedback,
+} from 'react-native';
 import styles from '@styles/styles';
 import CardItem from '../settings/CardItem';
+import {useIsFocused} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {RecordingsContext} from '@utils/recordings';
+import {
+  RecordingsContext,
+  pathToZippedFolder,
+  getDirectorySpace,
+  deleteDirecotoryOrFile,
+} from '@utils/recordings';
 
 const Settings = () => {
   const {
@@ -77,6 +91,35 @@ const Settings = () => {
     }
   };
 
+  const deleteCacheFiles = () => {
+    Alert.alert(
+      'Attention',
+      `Are you sure you want to flush the cache and save ${cacheSize}?`,
+      [
+        {
+          text: 'Proceed',
+          style: 'destructive',
+          onPress: () =>
+            deleteDirecotoryOrFile(pathToZippedFolder).then(() =>
+              setCacheSize('0 bytes'),
+            ),
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+      ],
+    );
+  };
+
+  const focused = useIsFocused();
+
+  useEffect(() => {
+    getDirectorySpace(pathToZippedFolder).then(size => setCacheSize(size));
+  }, [focused]);
+
+  const [cacheSize, setCacheSize] = useState('0 bytes');
+
   const opacity = useRef(
     new Animated.Value(settings.saveRecordings ? 1 : 0.5),
   ).current;
@@ -147,6 +190,17 @@ const Settings = () => {
           />
         }
       />
+      <TouchableWithoutFeedback onPress={() => deleteCacheFiles()}>
+        <View>
+          <CardItem
+            text={'Delete Cached Files'}
+            textStyle={{
+              color: 'rgba(139, 0, 0, 1)',
+            }}
+            rightElement={<Text>{`Size: ${cacheSize}`}</Text>}
+          />
+        </View>
+      </TouchableWithoutFeedback>
     </View>
   );
 };

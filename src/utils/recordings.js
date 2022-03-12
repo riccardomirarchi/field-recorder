@@ -86,6 +86,37 @@ export const getPlaybackOffset = async () =>
 export const getStereoMode = async () =>
   JSON.parse(await AsyncStorage.getItem('stereoMode'));
 
+const units = ['bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+function formatBytes(bytes) {
+  let l = 0,
+    n = parseInt(bytes, 10) || 0;
+
+  while (n >= 1024 && ++l) {
+    n = n / 1024;
+  }
+
+  return n.toFixed(n < 10 && l > 0 ? 1 : 0) + ' ' + units[l];
+}
+
+export const getDirectorySpace = async path => {
+  const {size} = await FileSystem.getInfoAsync(path);
+
+  return formatBytes(size);
+};
+
+export const deleteDirecotoryOrFile = async path => {
+  await FileSystem.deleteAsync(path, {
+    idempotent: true,
+  });
+
+  const zipped = await FileSystem.getInfoAsync(path);
+
+  if (!zipped.exists) {
+    await FileSystem.makeDirectoryAsync(pathToZippedFolder);
+  }
+};
+
 const doesZipExist = async recording => {
   // we must remove the : from the path, since stupid android file system crashes...
   const folderPath =

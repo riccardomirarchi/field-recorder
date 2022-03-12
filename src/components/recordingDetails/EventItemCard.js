@@ -1,5 +1,5 @@
 import React, {useEffect, useRef} from 'react';
-import {TouchableWithoutFeedback, Animated, View} from 'react-native';
+import {TouchableWithoutFeedback, Animated, View, Platform} from 'react-native';
 import styles from '@styles/styles';
 import Icon from 'react-native-vector-icons/AntDesign';
 import {formatMillis} from '../../utils/recordings';
@@ -61,7 +61,10 @@ const EventItemCard = ({onPress, item, highlighted}) => {
           <Animated.Text
             style={[
               styles.cardItemTextStyle,
-              {color: textColor, paddingTop: 4},
+              {
+                color: textColor,
+                paddingTop: Platform.OS == 'android' ? '0.7%' : 4,
+              },
             ]}>{`${item.title}  -  ${formatMillis(
             item.millisFromBeginning,
           )}`}</Animated.Text>
