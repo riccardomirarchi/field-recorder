@@ -23,7 +23,7 @@ const App = () => {
     loading: true,
     recordings: [],
     hasWaitingRec: false, // if not false we store the name of the recording that will be saved
-    settings: {
+    settings: { // defaults settings, true stored settings will be fetched when the component is rendered with RETRIEVE_SETTINGS function
       stereoMode: true,
       highQuality: true,
       saveRecordings: true,
