@@ -131,10 +131,10 @@ android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 
     defaultConfig {
-        applicationId "it.lim.fieldrecorder"
+        applicationId "com.unimi.lim.fieldrecorder"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
+        versionCode 20220317
         versionName "1.0"
         multiDexEnabled true
     }

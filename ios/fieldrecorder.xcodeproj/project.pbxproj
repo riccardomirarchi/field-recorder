@@ -307,7 +307,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 20220317;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = fieldrecorder/Info.plist;
@@ -320,7 +320,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = it.lim.fieldrecorder;
+				PRODUCT_BUNDLE_IDENTIFIER = com.unimi.lim.fieldrecorder;
 				PRODUCT_NAME = fieldrecorder;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_INSTALL_OBJC_HEADER = YES;
@@ -339,7 +339,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 20220317;
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = fieldrecorder/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -351,7 +351,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = it.lim.fieldrecorder;
+				PRODUCT_BUNDLE_IDENTIFIER = com.unimi.lim.fieldrecorder;
 				PRODUCT_NAME = fieldrecorder;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_INSTALL_OBJC_HEADER = YES;
