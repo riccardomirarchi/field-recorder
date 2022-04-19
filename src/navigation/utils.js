@@ -9,6 +9,9 @@ export const screenOptions = (route, color, focused) => {
     case 'SettingsStack':
       iconName = 'setting';
       break;
+    case 'MapsStack':
+      iconName = 'enviromento';
+      break;
     case 'LibraryStack':
       iconName = 'folder1';
       break;
@@ -25,6 +28,9 @@ export const labelOptions = (route, color, focused) => {
   switch (route.name) {
     case 'SettingsStack':
       label = 'Settings';
+      break;
+    case 'MapsStack':
+      label = 'Map';
       break;
     case 'LibraryStack':
       label = 'Library';

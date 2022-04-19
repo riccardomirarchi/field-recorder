@@ -17,7 +17,6 @@ import {
 import Icon from 'react-native-vector-icons/AntDesign';
 import CustomMicOffIcon from '@navigation/CustomMicOffIcon';
 import Ionicon from 'react-native-vector-icons/Ionicons';
-import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {ActionSheetProvider} from '@expo/react-native-action-sheet';
 
 // screens
@@ -25,6 +24,7 @@ import Library from '@screens/Library';
 import Recording from '@screens/Recording';
 import RecordingDetails from '@screens/RecordingDetails';
 import Settings from '@screens/Settings';
+import Map from '@screens/Map'
 
 // custom tab bar
 import CustomTabBarAndroid from '@navigation/CustomTabBarAndroid';
@@ -41,6 +41,7 @@ import {RecordingsContext} from '@utils/recordings';
 const SettingsStack = createStackNavigator();
 const LibraryStack = createStackNavigator();
 const RecordingStack = createStackNavigator();
+const MapStack = createStackNavigator();
 
 const MainBottomTabs = createBottomTabNavigator();
 
@@ -131,6 +132,14 @@ function LibraryS() {
         })}
       />
     </LibraryStack.Navigator>
+  );
+}
+
+function MapS() {
+  return (
+    <MapStack.Navigator screenOptions={({navigation}) => options(navigation)}>
+      <MapStack.Screen name={'Map'} component={Map} />
+    </MapStack.Navigator>
   );
 }
 
@@ -302,6 +311,7 @@ function MainBottomNavigator() {
         tabBarLabel: ({focused, color}) => labelOptions(route, color, focused),
       })}>
       <MainBottomTabs.Screen name={'LibraryStack'} component={LibraryS} />
+      <MainBottomTabs.Screen name={'MapsStack'} component={MapS} />
       <MainBottomTabs.Screen
         name={'RecordingStack'}
         options={{tabBarButton: () => null}}
